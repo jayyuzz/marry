@@ -1679,7 +1679,12 @@
             }
           }
         } catch (err) {
-          showAuthMsg(err.message || 'Authentication failed.', false);
+          const rawMsg = err.message || '';
+          if (rawMsg.toLowerCase().includes('rate limit')) {
+            showAuthMsg('⚠️ Email rate limit Supabase terlampaui (maks 3-4 email/jam bawaan Supabase). Silakan matikan "Confirm email" di Dashboard Supabase agar pendaftaran langsung aktif tanpa menunggu email.', false);
+          } else {
+            showAuthMsg(rawMsg || 'Authentication failed.', false);
+          }
           if (currentAuthMode === 'register') refreshCaptcha();
         } finally {
           authSubmitBtn.disabled = false;
