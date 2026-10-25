@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || '';
 
-let supabase = null;
+export let supabase = null;
 if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: false }
@@ -15,28 +15,62 @@ if (SUPABASE_URL && SUPABASE_KEY) {
 const memLimits = new Map();
 
 /**
- * Check if a client (IP / device token) is allowed to perform an analysis.
+ * Verify a user's Supabase JWT access token.
+ */
+export async function getUserFromToken(token) {
+  if (!supabase || !token) return null;
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (!error && user) return user;
+  } catch (e) {
+    console.warn('getUserFromToken error:', e.message);
+  }
+  return null;
+}
+
+/**
+ * Check if a client (IP, device token, or authenticated user ID) is allowed to perform an analysis.
  * Guests: allowed 1 free analysis.
+ * Registered Free Users: allowed 3 free analyses.
  * Members: unlimited.
  */
-export async function checkGuestLimit(identifier) {
-  if (!identifier) return { allowed: true, isMember: false, count: 0 };
+export async function checkGuestLimit(identifier, userId = null) {
+  const targetId = userId ? `user_${userId}` : identifier;
+  if (!targetId) return { allowed: true, isMember: false, count: 0, limit: 1 };
+
+  const freeLimit = userId ? 3 : 1;
 
   if (supabase) {
     try {
-      const { data, error } = await supabase
-        .from('guest_limits')
-        .select('*')
-        .eq('identifier', identifier)
-        .maybeSingle();
+      // Check user record first if logged in
+      let record = null;
+      if (userId) {
+        const { data } = await supabase
+          .from('guest_limits')
+          .select('*')
+          .eq('identifier', `user_${userId}`)
+          .maybeSingle();
+        record = data;
+      }
 
-      if (!error && data) {
-        const isMember = Boolean(data.is_member);
-        const count = Number(data.analyze_count || 0);
+      // Check device/IP identifier
+      if (!record && identifier) {
+        const { data } = await supabase
+          .from('guest_limits')
+          .select('*')
+          .eq('identifier', identifier)
+          .maybeSingle();
+        record = data;
+      }
+
+      if (record) {
+        const isMember = Boolean(record.is_member);
+        const count = Number(record.analyze_count || 0);
         return {
-          allowed: isMember || count < 1,
+          allowed: isMember || count < freeLimit,
           isMember,
-          count
+          count,
+          limit: isMember ? 9999 : freeLimit
         };
       }
     } catch (e) {
@@ -44,33 +78,35 @@ export async function checkGuestLimit(identifier) {
     }
   }
 
-  const rec = memLimits.get(identifier) || { count: 0, isMember: false };
+  const rec = memLimits.get(targetId) || { count: 0, isMember: false };
   return {
-    allowed: rec.isMember || rec.count < 1,
+    allowed: rec.isMember || rec.count < freeLimit,
     isMember: rec.isMember,
-    count: rec.count
+    count: rec.count,
+    limit: rec.isMember ? 9999 : freeLimit
   };
 }
 
 /**
- * Increment the analysis count for an identifier.
+ * Increment the analysis count for an identifier or user.
  */
-export async function incrementGuestUsage(identifier) {
-  if (!identifier) return;
+export async function incrementGuestUsage(identifier, userId = null) {
+  const targetId = userId ? `user_${userId}` : identifier;
+  if (!targetId) return;
 
   if (supabase) {
     try {
       const { data } = await supabase
         .from('guest_limits')
         .select('analyze_count, is_member')
-        .eq('identifier', identifier)
+        .eq('identifier', targetId)
         .maybeSingle();
 
       const currentCount = Number(data?.analyze_count || 0);
       const isMember = Boolean(data?.is_member);
 
       await supabase.from('guest_limits').upsert({
-        identifier,
+        identifier: targetId,
         analyze_count: currentCount + 1,
         is_member: isMember,
         last_used: new Date().toISOString()
@@ -81,9 +117,59 @@ export async function incrementGuestUsage(identifier) {
     }
   }
 
-  const rec = memLimits.get(identifier) || { count: 0, isMember: false };
+  const rec = memLimits.get(targetId) || { count: 0, isMember: false };
   rec.count += 1;
-  memLimits.set(identifier, rec);
+  memLimits.set(targetId, rec);
+}
+
+/**
+ * Activate membership for a user or identifier using an activation code.
+ */
+export async function activateMembership(identifier, userId = null, code = '') {
+  const cleanCode = String(code || '').trim().toUpperCase();
+  const validCodes = (process.env.MEMBERSHIP_PROMO_CODE || 'MARRYVIP,PRO2026,KOFI2026')
+    .split(',')
+    .map(c => c.trim().toUpperCase());
+
+  const targetId = userId ? `user_${userId}` : identifier;
+  if (!targetId) throw new Error('No client or user session provided.');
+
+  if (!cleanCode || !validCodes.includes(cleanCode)) {
+    throw new Error('Invalid or expired membership code.');
+  }
+
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from('guest_limits')
+        .select('analyze_count')
+        .eq('identifier', targetId)
+        .maybeSingle();
+
+      await supabase.from('guest_limits').upsert({
+        identifier: targetId,
+        analyze_count: data?.analyze_count || 0,
+        is_member: true,
+        last_used: new Date().toISOString()
+      });
+
+      if (identifier && identifier !== targetId) {
+        await supabase.from('guest_limits').upsert({
+          identifier,
+          is_member: true,
+          last_used: new Date().toISOString()
+        });
+      }
+      return { success: true, message: '🎉 Membership activated! You now have unlimited access & roadmaps.' };
+    } catch (e) {
+      console.warn('Supabase activateMembership error:', e.message);
+    }
+  }
+
+  const rec = memLimits.get(targetId) || { count: 0, isMember: true };
+  rec.isMember = true;
+  memLimits.set(targetId, rec);
+  return { success: true, message: '🎉 Membership activated! You now have unlimited access & roadmaps.' };
 }
 
 /**

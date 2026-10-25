@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Marry market globe logo</title>
+  <desc id="desc">A playful paper-cut globe with orbit lines, leaves and a bright spark.</desc>
+  <defs>
+    <filter id="paperShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="5" dy="7" stdDeviation="0" flood-color="#394733" flood-opacity="0.28"/>
+    </filter>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#e9e0cf"/>
+    </linearGradient>
+    <linearGradient id="globe" x1="0.15" y1="0.08" x2="0.9" y2="0.9">
+      <stop offset="0" stop-color="#d8e9a9"/>
+      <stop offset="0.48" stop-color="#96bd7d"/>
+      <stop offset="1" stop-color="#568364"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1c987"/>
+      <stop offset="1" stop-color="#d68166"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#3f7355"/>
+      <stop offset="1" stop-color="#90b874"/>
+    </linearGradient>
+  </defs>
+
+  <!-- paper sticker -->
+  <path d="M38 16h154c13 0 25 11 28 25l11 137c2 22-12 39-33 42L48 228c-19 2-34-12-36-32L13 48C11 30 21 18 38 16Z" fill="url(#paper)" stroke="#30382e" stroke-width="4" filter="url(#paperShadow)"/>
+  <path d="M31 31c39-12 127-12 175 0M26 208c52 12 126 11 174-2" fill="none" stroke="#a6b38d" stroke-width="2" stroke-dasharray="3 7" opacity="0.7"/>
+
+  <!-- orbit system -->
+  <ellipse cx="119" cy="123" rx="92" ry="39" fill="none" stroke="#d78368" stroke-width="3" stroke-dasharray="7 7" transform="rotate(-16 119 123)"/>
+  <ellipse cx="119" cy="123" rx="91" ry="42" fill="none" stroke="#709a74" stroke-width="3" stroke-dasharray="2 8" transform="rotate(24 119 123)"/>
+  <circle cx="206" cy="89" r="7" fill="#d78368" stroke="#30382e" stroke-width="3"/>
+  <circle cx="42" cy="160" r="6" fill="#709a74" stroke="#30382e" stroke-width="3"/>
+
+  <!-- globe -->
+  <circle cx="119" cy="121" r="66" fill="url(#globe)" stroke="#30382e" stroke-width="4"/>
+  <path d="M65 107c23-42 91-58 119-19-15-11-26-11-39-4-9 5-15 14-24 18-13 6-30 3-56 5Z" fill="#e9f2c3" opacity="0.7"/>
+  <path d="M76 143c15-15 29-13 39-4 7 6 12 18 26 18 14 0 22-13 35-12-11 25-30 39-56 40-18 1-34-8-44-20Z" fill="#6b9b6a" opacity="0.82"/>
+  <path d="M94 70c-10 18-14 34-13 51 1 21 8 40 22 59M143 58c-8 20-12 39-11 62 1 25 8 42 18 55M58 121h122M65 95c29 13 77 14 109 0M67 150c26-10 74-10 105 0" fill="none" stroke="#d7e8af" stroke-width="2.5" opacity="0.55"/>
+
+  <!-- rising leaf / growth mark -->
+  <path d="M105 74c-2-19 10-35 34-43 3 22-8 38-34 43Z" fill="url(#leaf)" stroke="#30382e" stroke-width="3"/>
+  <path d="M107 73c10-11 19-22 28-33" fill="none" stroke="#edf5cf" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- highlight -->
+  <ellipse cx="93" cy="92" rx="20" ry="11" fill="#f8ffe8" opacity="0.72" transform="rotate(-30 93 92)"/>
+
+  <!-- eye-catching spark -->
+  <path d="m180 46 6 17 17 6-17 6-6 17-6-17-17-6 17-6Z" fill="#f1c978" stroke="#30382e" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="182" cy="45" r="3" fill="#fff8d5"/>
+
+  <!-- small hand-drawn accents -->
+  <path d="m45 68 4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" fill="#d78368" stroke="#30382e" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="52" cy="187" r="4" fill="#f1c978" stroke="#30382e" stroke-width="2"/>
+</svg>

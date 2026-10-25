@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -570,10 +571,170 @@
     .ide-item:hover, .ide-item.active { background: #e4eccf; border-color: #759a72; transform: translateX(3px) rotate(-0.2deg); }
     .ide-item .cat { color: #8a8d7e; }
     select option { background: #f5f0e4; color: #20241f; }
+
+    /* ===== Top Navbar ===== */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(180, 188, 210, 0.45);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 14px rgba(90, 100, 140, 0.06);
+    }
+    .nav-brand { font-size: 1.15rem; font-weight: 800; color: #3a5ab0; display: flex; align-items: center; gap: 6px; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .nav-btn {
+      width: auto !important;
+      margin: 0 !important;
+      padding: 8px 16px !important;
+      font-size: 0.85rem !important;
+      font-weight: 700 !important;
+      border-radius: 999px !important;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .nav-btn.membership {
+      background: linear-gradient(90deg, #ffdd00, #ffb700) !important;
+      color: #1a1200 !important;
+      border: 1px solid rgba(255, 183, 0, 0.5) !important;
+      box-shadow: 0 2px 10px rgba(255, 183, 0, 0.25) !important;
+    }
+    .nav-btn.auth {
+      background: rgba(92, 115, 212, 0.12) !important;
+      color: #3a5ab0 !important;
+      border: 1px solid rgba(92, 115, 212, 0.3) !important;
+      box-shadow: none !important;
+    }
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(92, 115, 212, 0.08);
+      border: 1px solid rgba(92, 115, 212, 0.25);
+      font-size: 0.82rem;
+      color: #2a2d3e;
+      font-weight: 600;
+    }
+    .user-badge {
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .user-badge.member { background: #ffd700; color: #1a1200; }
+    .user-badge.free { background: rgba(92, 115, 212, 0.15); color: #3a5ab0; }
+
+    /* ===== Modals ===== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 15, 30, 0.65);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal-card {
+      background: #fdfdfd;
+      color: #2a2d3e;
+      max-width: 480px;
+      width: 100%;
+      border-radius: 20px;
+      padding: 28px 24px;
+      border: 1px solid rgba(140, 150, 190, 0.35);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.92) translateY(10px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      font-size: 1.4rem;
+      color: #7880a0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+    .modal-close:hover { color: #2a2d3e; transform: none; }
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(140, 150, 190, 0.25);
+      padding-bottom: 10px;
+    }
+    .auth-tab {
+      background: none;
+      border: none;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 6px 14px !important;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #7880a0;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: none !important;
+    }
+    .auth-tab.active {
+      color: #3a5ab0;
+      background: rgba(92, 115, 212, 0.1);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 18px 0;
+    }
+    @media (max-width: 520px) { .pricing-grid { grid-template-columns: 1fr; } }
+    .tier-box {
+      border: 1px solid rgba(140, 150, 190, 0.3);
+      border-radius: 14px;
+      padding: 16px;
+      background: rgba(245, 248, 255, 0.6);
+      text-align: left;
+    }
+    .tier-box.pro {
+      border-color: rgba(255, 183, 0, 0.6);
+      background: linear-gradient(145deg, rgba(255, 252, 230, 0.8), rgba(255, 245, 190, 0.4));
+      box-shadow: 0 4px 18px rgba(255, 183, 0, 0.15);
+    }
+    .tier-box h4 { font-size: 1.05rem; margin-bottom: 4px; }
+    .tier-box .price { font-size: 1.25rem; font-weight: 800; color: #3a5ab0; margin-bottom: 10px; }
+    .tier-box.pro .price { color: #d48800; }
+    .tier-box ul { list-style: none; padding: 0; margin: 0; font-size: 0.8rem; color: #5a607a; }
+    .tier-box li { padding: 3px 0; }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <div class="nav-brand">💍 marry</div>
+      <div class="nav-actions" id="nav-actions">
+        <button class="nav-btn membership" id="nav-open-membership">👑 Membership</button>
+        <button class="nav-btn auth" id="nav-open-auth">🔑 Sign In</button>
+      </div>
+    </nav>
+
     <header>
       <div class="hero-copy">
         <img src="logo-eye.svg" alt="marry market globe logo" style="width:72px;height:72px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;">
@@ -691,6 +852,92 @@
     <div class="footer">marry — for beginners selling digital products overseas. AI can be wrong; use as a starting point.</div>
   </div>
 
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close" id="close-auth-modal">✕</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login">Sign In</button>
+        <button class="auth-tab" id="tab-register">Create Account</button>
+      </div>
+
+      <form id="auth-form">
+        <div style="margin-bottom: 12px; text-align: left;">
+          <label style="font-size:0.82rem; font-weight:700; color:#5a607a;">Email Address</label>
+          <input type="email" id="auth-email" required placeholder="name@example.com" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(140,150,190,0.4); margin-top:4px;">
+        </div>
+        <div style="margin-bottom: 16px; text-align: left;">
+          <label style="font-size:0.82rem; font-weight:700; color:#5a607a;">Password</label>
+          <input type="password" id="auth-password" required minlength="6" placeholder="At least 6 characters" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(140,150,190,0.4); margin-top:4px;">
+        </div>
+
+        <button type="submit" id="auth-submit-btn" style="width:100%; padding:12px; font-weight:800; border-radius:10px; background:linear-gradient(90deg, #5c73d4, #8fa3f0); color:#fff; border:none; cursor:pointer;">
+          Sign In
+        </button>
+        <div id="auth-msg" style="margin-top:12px; font-size:0.85rem; display:none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Membership Modal -->
+  <div id="membership-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 520px;">
+      <button class="modal-close" id="close-membership-modal">✕</button>
+      <div style="text-align: center; margin-bottom: 14px;">
+        <span style="font-size: 2.2rem;">👑</span>
+        <h3 style="font-size: 1.35rem; color:#2a2d3e; font-weight:800; margin-top:4px;">Marry Pro Membership</h3>
+        <p style="font-size: 0.85rem; color:#7880a0;">Scale your small digital product overseas with full intelligence.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="tier-box">
+          <h4>Starter</h4>
+          <div class="price">Free</div>
+          <ul>
+            <li>✓ 1 Free AI Analysis (Guest)</li>
+            <li>✓ 3 Free Analyses (Registered)</li>
+            <li>✓ Viability Score & Niches</li>
+            <li>✗ Full Execution Roadmap</li>
+            <li>✗ Priority Support</li>
+          </ul>
+        </div>
+
+        <div class="tier-box pro">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4>Pro Member</h4>
+            <span style="font-size:0.68rem; font-weight:800; background:#ffd700; color:#1a1200; padding:2px 6px; border-radius:99px;">POPULAR</span>
+          </div>
+          <div class="price">$5 <span style="font-size:0.8rem; font-weight:500; color:#886000;">/ support</span></div>
+          <ul>
+            <li>✓ <b>Unlimited</b> Market Analyses</li>
+            <li>✓ <b>Complete 4-7 Phase Roadmap</b></li>
+            <li>✓ Validation & Launch Steps</li>
+            <li>✓ Priority AI Processing</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 10px;">
+        <a href="https://ko-fi.com/marry2" target="_blank" rel="noopener" style="display:block; width:100%; padding:13px; font-size:1rem; font-weight:800; border-radius:12px; background:linear-gradient(90deg, #FFDD00, #FFC200); color:#1a1200; text-decoration:none; box-shadow:0 4px 18px rgba(255,200,0,0.35);">
+          ☕ Subscribe on Ko-fi
+        </a>
+        <p style="font-size:0.75rem; color:#8d96b0; margin-top:6px;">Supporters get an instant membership code via Ko-fi.</p>
+      </div>
+
+      <!-- Redeem Code Section -->
+      <div style="margin-top: 18px; padding-top: 16px; border-top: 1px dashed rgba(140,150,190,0.35); text-align: left;">
+        <label style="font-size:0.8rem; font-weight:700; color:#5a607a;">Have a Membership or Ko-fi Code?</label>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <input type="text" id="activate-code-input" placeholder="e.g. MARRYVIP" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(140,150,190,0.4); text-transform:uppercase;">
+          <button id="activate-code-btn" style="width:auto; margin:0; padding:10px 18px; border-radius:10px; font-weight:700; background:#3a5ab0; color:#fff; border:none; cursor:pointer;">
+            Redeem
+          </button>
+        </div>
+        <div id="activate-msg" style="margin-top:8px; font-size:0.82rem; display:none;"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ===== Bahasa =====
     const BAHASA = [
@@ -782,12 +1029,16 @@
       const negara = (negaraSel ? negaraSel.value : '').trim();
       const negaraMsg = negara ? `\nFOCUS TARGET MARKET ONLY ON THE COUNTRY/REGION: ${negara}. Prioritize and analyze the market, culture, and purchasing behavior for ${negara}.` : '';
       const did = getDeviceId();
+      const token = await getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+        'x-device-id': did
+      };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
       const resp = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-device-id': did
-        },
+        headers,
         body: JSON.stringify({ ...body, _bahasa: lang, _negara: negara, _deviceId: did, _userPrompt: userOverride + negaraMsg })
       });
       const data = await resp.json().catch(() => ({}));
@@ -1084,6 +1335,212 @@
     }
     loadVisitorStats();
     setInterval(loadVisitorStats, 20000); // Live refresh every 20s
+
+    // ===== Supabase Auth & Membership Client Logic =====
+    let sbClient = null;
+    let currentUser = null;
+    let currentAuthMode = 'login'; // 'login' or 'register'
+
+    const authModal = document.getElementById('auth-modal');
+    const membershipModal = document.getElementById('membership-modal');
+    const navOpenAuth = document.getElementById('nav-open-auth');
+    const navOpenMembership = document.getElementById('nav-open-membership');
+    const closeAuthModal = document.getElementById('close-auth-modal');
+    const closeMembershipModal = document.getElementById('close-membership-modal');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const authForm = document.getElementById('auth-form');
+    const authEmail = document.getElementById('auth-email');
+    const authPassword = document.getElementById('auth-password');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const authMsg = document.getElementById('auth-msg');
+    const navActions = document.getElementById('nav-actions');
+
+    // Init Supabase from /api/config
+    async function initSupabase() {
+      try {
+        const res = await fetch('/api/config');
+        if (!res.ok) return;
+        const cfg = await res.json();
+        if (window.supabase && cfg.supabaseUrl && cfg.supabaseAnonKey) {
+          sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+          
+          // Listen to auth changes
+          sbClient.auth.onAuthStateChange((event, session) => {
+            currentUser = session?.user || null;
+            updateUserNav();
+          });
+
+          // Check current session
+          const { data: { session } } = await sbClient.auth.getSession();
+          currentUser = session?.user || null;
+          updateUserNav();
+        }
+      } catch (e) {
+        console.warn('Supabase init failed:', e);
+      }
+    }
+    initSupabase();
+
+    // Update Top Nav based on user state
+    async function updateUserNav() {
+      if (!navActions) return;
+      try {
+        const token = await getAuthToken();
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+        const res = await fetch('/api/me', { headers });
+        const me = res.ok ? await res.json() : null;
+        const isMember = Boolean(me?.isMember);
+
+        if (currentUser) {
+          navActions.innerHTML = `
+            <div class="user-pill">
+              <span>👤 ${esc(currentUser.email.split('@')[0])}</span>
+              <span class="user-badge ${isMember ? 'member' : 'free'}">${isMember ? '👑 PRO' : 'FREE'}</span>
+            </div>
+            ${!isMember ? '<button class="nav-btn membership" id="nav-open-membership">👑 Upgrade</button>' : ''}
+            <button class="nav-btn auth" id="nav-sign-out">Sign Out</button>
+          `;
+          const btnSignOut = document.getElementById('nav-sign-out');
+          if (btnSignOut) btnSignOut.onclick = async () => {
+            if (sbClient) await sbClient.auth.signOut();
+            currentUser = null;
+            updateUserNav();
+          };
+          const btnUpgrade = document.getElementById('nav-open-membership');
+          if (btnUpgrade) btnUpgrade.onclick = () => { membershipModal.style.display = 'flex'; };
+        } else {
+          navActions.innerHTML = `
+            <button class="nav-btn membership" id="nav-open-membership">👑 Membership</button>
+            <button class="nav-btn auth" id="nav-open-auth">🔑 Sign In</button>
+          `;
+          document.getElementById('nav-open-membership').onclick = () => { membershipModal.style.display = 'flex'; };
+          document.getElementById('nav-open-auth').onclick = () => { authModal.style.display = 'flex'; };
+        }
+      } catch (e) {}
+    }
+
+    async function getAuthToken() {
+      if (!sbClient) return '';
+      try {
+        const { data: { session } } = await sbClient.auth.getSession();
+        return session?.access_token || '';
+      } catch {
+        return '';
+      }
+    }
+
+    // Modal Triggers
+    if (navOpenAuth) navOpenAuth.onclick = () => { authModal.style.display = 'flex'; };
+    if (navOpenMembership) navOpenMembership.onclick = () => { membershipModal.style.display = 'flex'; };
+    if (closeAuthModal) closeAuthModal.onclick = () => { authModal.style.display = 'none'; };
+    if (closeMembershipModal) closeMembershipModal.onclick = () => { membershipModal.style.display = 'none'; };
+    window.addEventListener('click', (e) => {
+      if (e.target === authModal) authModal.style.display = 'none';
+      if (e.target === membershipModal) membershipModal.style.display = 'none';
+    });
+
+    // Tab Switcher
+    if (tabLogin && tabRegister) {
+      tabLogin.onclick = () => {
+        currentAuthMode = 'login';
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        authSubmitBtn.textContent = 'Sign In';
+        authMsg.style.display = 'none';
+      };
+      tabRegister.onclick = () => {
+        currentAuthMode = 'register';
+        tabRegister.classList.add('active');
+        tabLogin.classList.remove('active');
+        authSubmitBtn.textContent = 'Create Account';
+        authMsg.style.display = 'none';
+      };
+    }
+
+    // Auth Form Submit
+    if (authForm) {
+      authForm.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!sbClient) {
+          showAuthMsg('Supabase is still connecting. Please try again in a moment.', false);
+          return;
+        }
+        const email = authEmail.value.trim();
+        const password = authPassword.value;
+        authSubmitBtn.disabled = true;
+        authSubmitBtn.textContent = 'Please wait…';
+        authMsg.style.display = 'none';
+
+        try {
+          if (currentAuthMode === 'login') {
+            const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            showAuthMsg('Signed in successfully!', true);
+            setTimeout(() => { authModal.style.display = 'none'; }, 800);
+          } else {
+            const { data, error } = await sbClient.auth.signUp({ email, password });
+            if (error) throw error;
+            showAuthMsg('Account created! ' + (data?.session ? 'You are now signed in.' : 'Check your email to confirm.'), true);
+            setTimeout(() => { authModal.style.display = 'none'; }, 1500);
+          }
+        } catch (err) {
+          showAuthMsg(err.message || 'Authentication failed.', false);
+        } finally {
+          authSubmitBtn.disabled = false;
+          authSubmitBtn.textContent = currentAuthMode === 'login' ? 'Sign In' : 'Create Account';
+        }
+      };
+    }
+
+    function showAuthMsg(msg, isSuccess) {
+      authMsg.textContent = msg;
+      authMsg.style.display = 'block';
+      authMsg.style.color = isSuccess ? '#1a7a52' : '#c0404a';
+    }
+
+    // Membership Code Activation
+    const activateBtn = document.getElementById('activate-code-btn');
+    const activateInput = document.getElementById('activate-code-input');
+    const activateMsg = document.getElementById('activate-msg');
+
+    if (activateBtn && activateInput) {
+      activateBtn.onclick = async () => {
+        const code = activateInput.value.trim();
+        if (!code) return;
+        activateBtn.disabled = true;
+        activateBtn.textContent = '…';
+        activateMsg.style.display = 'none';
+
+        try {
+          const token = await getAuthToken();
+          const headers = { 'Content-Type': 'application/json' };
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+          const did = getDeviceId();
+          headers['x-device-id'] = did;
+
+          const res = await fetch('/api/activate', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ code })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to activate code.');
+
+          activateMsg.textContent = data.message || '🎉 Pro Membership activated!';
+          activateMsg.style.color = '#1a7a52';
+          activateMsg.style.display = 'block';
+          updateUserNav();
+        } catch (e) {
+          activateMsg.textContent = '⚠️ ' + e.message;
+          activateMsg.style.color = '#c0404a';
+          activateMsg.style.display = 'block';
+        } finally {
+          activateBtn.disabled = false;
+          activateBtn.textContent = 'Redeem';
+        }
+      };
+    }
   </script>
 </body>
 </html>

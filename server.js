@@ -17,7 +17,9 @@ import {
   checkGuestLimit,
   incrementGuestUsage,
   recordVisitorCountry,
-  getVisitorStatsFromDb
+  getVisitorStatsFromDb,
+  getUserFromToken,
+  activateMembership
 } from './supabase.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -45,6 +47,15 @@ function clientId(req) {
   const ip = clientIp(req);
   const deviceId = req.headers['x-device-id'] || req.body?._deviceId || '';
   return deviceId ? `${ip}_${deviceId}` : ip;
+}
+
+async function reqUser(req) {
+  const auth = req.headers['authorization'] || '';
+  if (auth.startsWith('Bearer ')) {
+    const token = auth.slice(7).trim();
+    if (token) return await getUserFromToken(token);
+  }
+  return null;
 }
 
 function isLocalIp(ip) {
@@ -285,6 +296,13 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, aiConfigured: Boolean(AI_API_KEY && AI_API_KEY !== 'GANTI_ME') });
 });
 
+app.get('/api/config', (req, res) => {
+  res.json({
+    supabaseUrl: process.env.SUPABASE_URL || 'https://dmrnrtpxtgqnnpoizmhd.supabase.co',
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY || 'sb_publishable_J6QeKrJNpavaStsVJ2paWg_jbzYNoJ-'
+  });
+});
+
 app.post('/api/analyze', aiRateLimit, async (req, res) => {
   const input = (req.body?.produk || '').trim();
   const bahasaUser = (req.body?._userPrompt || '').trim();
@@ -292,23 +310,26 @@ app.post('/api/analyze', aiRateLimit, async (req, res) => {
   if (input.length > 500) return res.status(400).json({ error: 'Description too long (max 500 characters).' });
 
   const id = clientId(req);
-  const limitCheck = await checkGuestLimit(id);
+  const user = await reqUser(req);
+  const limitCheck = await checkGuestLimit(id, user?.id);
   if (!limitCheck.allowed) {
     return res.status(403).json({
       error: 'LIMIT_REACHED',
       limitReached: true,
       isMember: false,
-      message: 'Free guest limit reached (1/1 analysis). Join membership to get unlimited analyses & roadmaps!'
+      message: user
+        ? 'Free account limit reached (3/3 analyses). Join membership to get unlimited analyses & roadmaps!'
+        : 'Free guest limit reached (1/1 analysis). Create an account or join membership for unlimited access!'
     });
   }
 
   try {
     const result = normalizeAnalysisResult(await callAI(input, { user: bahasaUser || undefined }));
-    await incrementGuestUsage(id);
+    await incrementGuestUsage(id, user?.id);
     res.json({
       ...result,
       isMember: limitCheck.isMember,
-      remainingFree: limitCheck.isMember ? 999 : 0
+      remainingFree: limitCheck.isMember ? 999 : Math.max(0, limitCheck.limit - (limitCheck.count + 1))
     });
   } catch (e) {
     res.status(e.status || 500).json({ error: e.message });
@@ -322,7 +343,8 @@ app.post('/api/roadmap', aiRateLimit, async (req, res) => {
   if (input.length > 500) return res.status(400).json({ error: 'Description too long (max 500 characters).' });
 
   const id = clientId(req);
-  const limitCheck = await checkGuestLimit(id);
+  const user = await reqUser(req);
+  const limitCheck = await checkGuestLimit(id, user?.id);
   if (!limitCheck.isMember) {
     return res.status(403).json({
       error: 'MEMBERSHIP_REQUIRED',
@@ -342,16 +364,34 @@ app.post('/api/roadmap', aiRateLimit, async (req, res) => {
   }
 });
 
-// Check guest limit status endpoint
+// Check user & membership status
 app.get('/api/me', async (req, res) => {
   const id = clientId(req);
-  const status = await checkGuestLimit(id);
+  const user = await reqUser(req);
+  const status = await checkGuestLimit(id, user?.id);
   res.json({
     id,
+    user: user ? { id: user.id, email: user.email } : null,
     isMember: status.isMember,
     count: status.count,
+    limit: status.limit,
     allowed: status.allowed
   });
+});
+
+// Activate membership using a promo/order code
+app.post('/api/activate', async (req, res) => {
+  const id = clientId(req);
+  const user = await reqUser(req);
+  const code = (req.body?.code || '').trim();
+  if (!code) return res.status(400).json({ error: 'Please enter your membership code.' });
+
+  try {
+    const resActivate = await activateMembership(id, user?.id, code);
+    res.json(resActivate);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 // Keep API errors JSON-shaped and avoid exposing Express/body-parser stack traces.
