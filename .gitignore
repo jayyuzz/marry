@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+visitors.json
+*-test*.json
+test-*.json
+raw-test.json

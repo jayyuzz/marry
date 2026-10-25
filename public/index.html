@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>marry — Check International Market Prospect</title>
+  <meta name="description" content="Analyze overseas market prospects for small digital products: ebook, app, template, course. Free.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(160deg, #e8eaf0, #d6dae6, #eceef4);
+      color: #2a2d3e;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+    header { text-align: center; margin-bottom: 28px; }
+    header h1 {
+      font-size: 2.2rem; letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #3a5ab0, #7c8ed0);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    header p { color: #5a607a; margin-top: 6px; font-size: 0.95rem; }
+    .card {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(180,188,210,0.5);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 16px rgba(90,100,140,0.08);
+    }
+    label { font-size: 0.85rem; color: #3a3f5c; font-weight: 600; }
+    textarea {
+      width: 100%; margin-top: 8px; padding: 14px; border-radius: 10px;
+      border: 1px solid rgba(140,150,190,0.4);
+      background: rgba(255,255,255,0.8); color: #2a2d3e;
+      font-size: 1rem; font-family: inherit; resize: vertical; min-height: 84px;
+    }
+    textarea::placeholder { color: #9098b8; }
+    textarea:focus { outline: 2px solid #7c8ed0; border-color: transparent; }
+    .hint { font-size: 0.8rem; color: #7880a0; margin-top: 6px; }
+    .country-wrap { margin-top: 12px; }
+    input[type="text"] {
+      width: 100%; margin-top: 8px; padding: 12px; border-radius: 10px; font-family: inherit;
+      border: 1px solid rgba(140,150,190,0.4); background: rgba(255,255,255,0.8); color: #2a2d3e; font-size: 0.95rem;
+    }
+    input[type="text"]::placeholder { color: #9098b8; }
+    input[type="text"]:focus { outline: 2px solid #7c8ed0; border-color: transparent; }
+    .lang-label { margin-top: 14px; display: block; }
+    button {
+      width: 100%; margin-top: 14px; padding: 14px; border: none; border-radius: 12px;
+      font-size: 1.05rem; font-weight: 700; cursor: pointer; color: #fff;
+      background: linear-gradient(90deg, #5c73d4, #8fa3f0);
+      transition: transform 0.15s, opacity 0.15s;
+      box-shadow: 0 2px 12px rgba(92,115,212,0.3);
+    }
+    button:hover { transform: translateY(-1px); opacity: 0.92; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip {
+      background: rgba(92,115,212,0.1); color: #4a5fa8;
+      border: 1px solid rgba(92,115,212,0.25); padding: 6px 12px;
+      border-radius: 999px; font-size: 0.8rem; cursor: pointer;
+    }
+    .chip:hover { background: rgba(92,115,212,0.2); }
+    #status { text-align: center; font-size: 0.88rem; color: #5a607a; display: none; }
+    #spinner { margin: 10px auto; width: 26px; height: 26px; border: 3px solid rgba(92,115,212,0.2); border-top-color: #5c73d4; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result { display: none; }
+    .result h2 { font-size: 1.35rem; margin: 6px 0 2px; color: #2a2d3e; }
+    .ringkas { color: #4a5070; font-size: 0.95rem; margin-bottom: 14px; }
+    .score-row { display: flex; align-items: center; gap: 14px; margin: 12px 0; }
+    .ring {
+      width: 88px; height: 88px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem; font-weight: 800;
+      background: conic-gradient(#5c73d4 var(--p, 0%), rgba(140,150,190,0.15) 0);
+    }
+    .ring span { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f0f2f8; color: #2a2d3e; }
+    .badge { display: inline-block; padding: 5px 12px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; }
+    .badge.layak { background: #e6f7f0; color: #1a7a52; border: 1px solid #2fae71; }
+    .badge.hati { background: #fdf6e3; color: #8a6200; border: 1px solid #c99a2e; }
+    .badge.tidak { background: #fdecea; color: #b02020; border: 1px solid #d14a4a; }
+    .meters { margin-top: 6px; }
+    .meter-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+    .meter-label { width: 150px; font-size: 0.85rem; color: #5a607a; }
+    .meter { flex: 1; height: 10px; background: rgba(140,150,190,0.2); border-radius: 99px; overflow: hidden; }
+    .meter > div { height: 100%; border-radius: 99px; }
+    .meter-val { width: 42px; text-align: right; font-size: 0.85rem; font-weight: 700; }
+    .dm { color: #2a8c6a; } .compet { color: #c0404a; } .req { color: #3a6ab8; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+    .sec h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6870a0; margin-bottom: 8px; }
+    .sec ul { list-style: none; }
+    .sec li { padding: 6px 0 6px 18px; position: relative; font-size: 0.92rem; color: #2a2d3e; }
+    .sec li::before { content: '▸'; position: absolute; left: 0; color: #5c73d4; }
+    .price-line { font-size: 0.95rem; }
+    .price-line b { color: #3a6ab8; }
+    .price-note { font-size: 0.78rem; color: #7880a0; margin-top: 4px; }
+    .footer { text-align: center; color: #9098b8; font-size: 0.75rem; margin-top: 30px; }
+    .error { color: #c0404a; text-align: center; font-size: 0.88rem; margin-top: 12px; display: block; }
+    .roadmap-btn {
+      width: 100%; margin-top: 16px; padding: 13px; border: 1px solid rgba(92,115,212,0.35);
+      border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; color: #3a5ab0;
+      background: rgba(92,115,212,0.08); transition: transform 0.15s, background 0.15s;
+      display: none; box-shadow: none;
+    }
+    .roadmap-btn:hover { background: rgba(92,115,212,0.16); }
+    .roadmap { margin-top: 16px; border-top: 1px solid rgba(140,150,190,0.25); padding-top: 16px; }
+    .roadmap h3.rd-title { color: #3a5ab0; font-size: 1rem; margin-bottom: 4px; }
+    .phases { margin-top: 14px; }
+    .phase { border-left: 3px solid #5c73d4; padding: 6px 0 14px 16px; margin-left: 6px; position: relative; }
+    .phase::before { content: ''; position: absolute; left: -7px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: #5c73d4; box-shadow: 0 0 8px rgba(92,115,212,0.4); }
+    .phase p { font-size: 0.85rem; color: #6870a0; margin: 2px 0 8px; }
+    .phase ul { list-style: none; margin: 0 0 6px; }
+    .phase li { padding: 4px 0 4px 16px; position: relative; font-size: 0.9rem; color: #2a2d3e; }
+    .phase li::before { content: '▸'; position: absolute; left: 0; color: #5c73d4; }
+    .outcome { font-size: 0.83rem; color: #1a7a52; background: rgba(47,174,113,0.1); border-radius: 8px; padding: 8px 10px; display: inline-block; border: 1px solid rgba(47,174,113,0.2); }
+    .outcome b { color: #1a7a52; }
+    .dur { font-size: 0.7rem; color: #5c73d4; letter-spacing: 0.03em; }
+    select {
+      width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; font-family: inherit;
+      border: 1px solid rgba(140,150,190,0.4); background: rgba(255,255,255,0.8); color: #2a2d3e; font-size: 0.95rem;
+    }
+    select option { background: #f0f2f8; color: #2a2d3e; }
+    .ide-list { max-height: 380px; overflow-y: auto; margin-top: 12px; }
+    .ide-item { padding: 9px 12px; margin-bottom: 6px; border-radius: 8px; background: rgba(255,255,255,0.7); border: 1px solid rgba(140,150,190,0.25); font-size: 0.9rem; cursor: pointer; transition: background 0.15s; color: #2a2d3e; }
+    .ide-item:hover, .ide-item.active { background: rgba(92,115,212,0.12); border-color: #5c73d4; }
+    .ide-item .cat { display: block; font-size: 0.7rem; color: #7880a0; margin-top: 2px; }
+    .counter { font-size: 0.8rem; color: #7880a0; margin-top: 8px; }
+
+    /* ===== Modern 3D UI layer ===== */
+    :root {
+      --ink: #f7f8ff;
+      --muted: #a9b2d7;
+      --subtle: #737da9;
+      --surface: rgba(19, 26, 57, 0.72);
+      --surface-strong: rgba(24, 32, 70, 0.92);
+      --line: rgba(157, 174, 255, 0.18);
+      --violet: #8e7dff;
+      --cyan: #5fe3ff;
+      --pink: #ff8bc7;
+      --shadow-3d: 0 24px 60px rgba(0, 0, 0, 0.3), 0 8px 22px rgba(65, 80, 170, 0.2);
+    }
+
+    html { background: #080c20; }
+    body {
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(101, 85, 255, 0.28), transparent 30%),
+        radial-gradient(circle at 88% 15%, rgba(47, 204, 255, 0.2), transparent 28%),
+        radial-gradient(circle at 62% 88%, rgba(255, 108, 190, 0.14), transparent 30%),
+        linear-gradient(145deg, #080c20 0%, #101536 46%, #090d24 100%);
+      color: var(--ink);
+    }
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      z-index: -1;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      filter: blur(10px);
+      pointer-events: none;
+      opacity: 0.36;
+    }
+    body::before { top: 12%; left: -150px; background: #6c5eff; }
+    body::after { right: -140px; bottom: 12%; background: #2edcf5; }
+
+    .wrap { max-width: 1040px; padding: 28px 22px 72px; }
+    header {
+      position: relative;
+      min-height: 300px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      align-items: center;
+      gap: 24px;
+      text-align: left;
+      margin-bottom: 24px;
+      padding: 32px 36px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: linear-gradient(135deg, rgba(22, 29, 68, 0.9), rgba(21, 26, 59, 0.56));
+      box-shadow: var(--shadow-3d);
+      transform: perspective(1200px) rotateX(1deg);
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 29px;
+      background: linear-gradient(120deg, rgba(255,255,255,0.1), transparent 30%, transparent 70%, rgba(95,227,255,0.08));
+      pointer-events: none;
+    }
+    header > *:not(.hero-scene) { position: relative; z-index: 1; }
+    header img {
+      width: 58px !important;
+      height: 58px !important;
+      margin: 0 0 18px !important;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(142,125,255,0.28));
+      box-shadow: 8px 10px 22px rgba(0,0,0,0.22), inset 1px 1px 0 rgba(255,255,255,0.25);
+    }
+    header h1 {
+      font-size: clamp(3.2rem, 8vw, 5.8rem);
+      line-height: 0.9;
+      letter-spacing: -0.08em;
+      background: linear-gradient(105deg, #ffffff 8%, #b9b0ff 42%, #68e9ff 88%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 14px 32px rgba(95, 227, 255, 0.12);
+    }
+    header p { max-width: 480px; color: var(--muted); margin-top: 16px; font-size: 1.02rem; line-height: 1.6; }
+    .hero-scene {
+      position: absolute;
+      right: 24px;
+      top: 16px;
+      width: 270px;
+      height: 270px;
+      pointer-events: none;
+      perspective: 800px;
+    }
+    .hero-orb {
+      position: absolute;
+      inset: 54px;
+      border-radius: 42% 58% 56% 44% / 43% 40% 60% 57%;
+      background: radial-gradient(circle at 30% 25%, #ffffff 0 4%, #9e94ff 12%, #6455df 34%, #24236b 66%, #11153f 100%);
+      box-shadow: -18px -18px 30px rgba(255,255,255,0.14) inset, 22px 26px 32px rgba(0,0,0,0.38), 0 0 50px rgba(105, 95, 255, 0.44);
+      transform: rotateX(12deg) rotateY(-22deg) rotateZ(-12deg);
+      animation: floatOrb 7s ease-in-out infinite;
+    }
+    .hero-orb::after {
+      content: '';
+      position: absolute;
+      inset: 12% 18% 48% 18%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0));
+      filter: blur(4px);
+      transform: rotate(-18deg);
+    }
+    .hero-orbit {
+      position: absolute;
+      inset: 28px;
+      border: 1px solid rgba(105, 229, 255, 0.42);
+      border-radius: 50%;
+      transform: rotateX(63deg) rotateZ(-18deg);
+      box-shadow: 0 0 20px rgba(95,227,255,0.16);
+      animation: spinOrbit 12s linear infinite;
+    }
+    .hero-orbit::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: 3px;
+      left: 50%;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 18px var(--cyan);
+    }
+    .hero-orbit.two { inset: 12px 44px; transform: rotateY(68deg) rotateZ(24deg); animation-duration: 16s; animation-direction: reverse; border-color: rgba(255,139,199,0.34); }
+    .hero-orbit.two::after { background: var(--pink); box-shadow: 0 0 18px var(--pink); }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border: 1px solid rgba(95,227,255,0.22);
+      border-radius: 999px;
+      color: #bcefff;
+      background: rgba(95,227,255,0.08);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #62f0bb; box-shadow: 0 0 12px #62f0bb; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .hero-stat {
+      min-width: 120px;
+      padding: 11px 13px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.055);
+      box-shadow: 8px 8px 18px rgba(0,0,0,0.14), inset 1px 1px 0 rgba(255,255,255,0.08);
+    }
+    .hero-stat b { display: block; color: #ffffff; font-size: 1rem; }
+    .hero-stat span { color: var(--subtle); font-size: 0.72rem; }
+    .card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 24px;
+      background: linear-gradient(145deg, rgba(27, 35, 78, 0.86), rgba(15, 20, 47, 0.72));
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-3d);
+      transform: perspective(1200px) translateZ(0);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 23px;
+      background: linear-gradient(125deg, rgba(255,255,255,0.08), transparent 24%, transparent 78%, rgba(95,227,255,0.05));
+      pointer-events: none;
+    }
+    .card > * { position: relative; z-index: 1; }
+    label { color: #d9ddff; letter-spacing: 0.01em; }
+    textarea, input[type="text"], select {
+      border-color: rgba(157,174,255,0.2);
+      background: rgba(5, 9, 28, 0.52);
+      color: var(--ink);
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.16), 0 1px 0 rgba(255,255,255,0.04);
+    }
+    textarea::placeholder, input[type="text"]::placeholder { color: #6f7ba7; }
+    textarea:focus, input[type="text"]:focus, select:focus { outline: 2px solid rgba(95,227,255,0.64); border-color: transparent; }
+    .hint, .price-note, .footer, .counter { color: var(--subtle); }
+    .examples { gap: 9px; }
+    .chip {
+      color: #c6c2ff;
+      border-color: rgba(142,125,255,0.28);
+      background: linear-gradient(145deg, rgba(142,125,255,0.18), rgba(95,227,255,0.06));
+      box-shadow: 4px 5px 10px rgba(0,0,0,0.12), inset 1px 1px 0 rgba(255,255,255,0.08);
+    }
+    .chip:hover { background: rgba(142,125,255,0.28); transform: translateY(-2px); }
+    button {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: linear-gradient(115deg, #6e5bf4, #8b70ff 45%, #36cfe8);
+      box-shadow: 0 12px 24px rgba(70, 77, 210, 0.32), inset 1px 1px 0 rgba(255,255,255,0.32), inset -2px -3px 0 rgba(39, 39, 120, 0.22);
+      transform: translateZ(0);
+    }
+    button::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.28), transparent 70%); transform: translateX(-120%); transition: transform 0.5s; }
+    button:hover::after { transform: translateX(120%); }
+    button:hover { transform: translateY(-3px) scale(1.005); }
+    #status { color: var(--muted); }
+    .result h2, .sec li, .phase li, .price-line { color: var(--ink); }
+    .ring { box-shadow: 10px 12px 24px rgba(0,0,0,0.22), inset 2px 2px 4px rgba(255,255,255,0.1); background: conic-gradient(#8d7bff var(--p, 0%), rgba(157,174,255,0.12) 0); }
+    .ring span { background: linear-gradient(145deg, #252d62, #111633); color: #ffffff; box-shadow: inset 2px 2px 6px rgba(255,255,255,0.08); }
+    .meter { background: rgba(157,174,255,0.12); }
+    .sec h3 { color: #8f9bd0; }
+    .roadmap { border-top-color: rgba(157,174,255,0.18); }
+    .roadmap-btn { color: #c6c2ff; border-color: rgba(142,125,255,0.35); background: rgba(142,125,255,0.1); }
+    .roadmap-btn:hover { background: rgba(142,125,255,0.2); }
+    .phase { border-left-color: #8d7bff; }
+    .phase::before { background: #8d7bff; box-shadow: 0 0 14px rgba(141,123,255,0.7); }
+    .phase p { color: var(--muted); }
+    .outcome { color: #7ff2c0; background: rgba(47, 174, 113, 0.1); border-color: rgba(127,242,192,0.2); }
+    .ide-item { color: var(--ink); background: rgba(255,255,255,0.045); border-color: rgba(157,174,255,0.14); box-shadow: 4px 5px 12px rgba(0,0,0,0.1); }
+    .ide-item:hover, .ide-item.active { background: rgba(142,125,255,0.16); border-color: #8d7bff; transform: translateX(3px); }
+    select option { background: #161d44; color: var(--ink); }
+    .footer { letter-spacing: 0.02em; }
+
+    @keyframes floatOrb { 0%, 100% { transform: rotateX(12deg) rotateY(-22deg) rotateZ(-12deg) translate3d(0, 0, 0); } 50% { transform: rotateX(18deg) rotateY(-10deg) rotateZ(-5deg) translate3d(0, -12px, 10px); } }
+    @keyframes spinOrbit { to { transform: rotateX(63deg) rotateZ(342deg); } }
+    @media (max-width: 760px) {
+      header { grid-template-columns: 1fr; min-height: 360px; padding: 26px 24px; }
+      .hero-scene { right: -24px; top: 105px; opacity: 0.74; transform: scale(0.82); transform-origin: right top; }
+      header p, .hero-meta { max-width: 62%; }
+      .wrap { padding-left: 14px; padding-right: 14px; }
+    }
+    @media (max-width: 520px) {
+      header { min-height: 390px; border-radius: 24px; }
+      header h1 { font-size: 3.8rem; }
+      header p, .hero-meta { max-width: 100%; }
+      .hero-scene { top: 175px; right: -62px; opacity: 0.5; }
+      .card { padding: 18px; border-radius: 20px; }
+      .card::before { border-radius: 19px; }
+      .meter-label { width: 118px; font-size: 0.75rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="hero-copy">
+        <img src="logo.svg" alt="marry logo" style="width:72px;height:72px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;">
+        <div class="hero-badge">AI market lab · nature 3D</div>
+        <h1>marry</h1>
+        <p>Turn your small digital product into a sharper global opportunity with fast, visual market intelligence.</p>
+        <div class="hero-meta" aria-label="Product highlights">
+          <div class="hero-stat"><b>50+</b><span>languages</span></div>
+          <div class="hero-stat"><b>142</b><span>idea sparks</span></div>
+          <div class="hero-stat"><b>1 click</b><span>to roadmap</span></div>
+        </div>
+      </div>
+      <div class="hero-scene" aria-hidden="true">
+        <div class="hero-orbit"></div>
+        <div class="hero-orbit two"></div>
+        <div class="hero-orb"></div>
+      </div>
+    </header>
+
+    <div class="card">
+      <label for="produk">Your product idea</label>
+      <textarea id="produk" maxlength="500" placeholder="e.g. Ebook 30 Indonesian home cooking recipes (English)"></textarea>
+      <div class="hint">Ebook, app, Notion template, mini-course, presets, etc.</div>
+
+      <div class="country-wrap">
+        <label for="negara">Target country / Negara target (optional — type any country)</label>
+        <input id="negara" type="text" maxlength="100" placeholder="e.g. Japan, Germany, Brazil, …" autocomplete="off">
+      </div>
+
+      <label for="locale-select" class="lang-label">🌐 Language</label>
+      <p class="hint">Results are generated in this language.</p>
+
+      <div class="examples">
+        <span class="chip">Ebook Indonesian recipes</span>
+        <span class="chip">Habit tracker app for students</span>
+        <span class="chip">Notion template for freelancers</span>
+        <span class="chip">Lightroom food presets</span>
+      </div>
+
+      <button id="btn">Analyze</button>
+      <div id="status"><div id="spinner"></div>Analyzing the market…</div>
+      <span id="err" class="error" style="display:none"></span>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <div class="card" style="margin-top: 26px">
+      <label for="ide-filter">💡 Trending international ideas</label>
+      <p class="hint">Click an idea → analyze instantly.</p>
+      <select id="ide-filter">
+        <option value="all">All categories (142 ideas)</option>
+      </select>
+      <div id="ide-list" class="ide-list"></div>
+    </div>
+
+    <!-- Buy Me a Coffee -->
+    <div style="text-align:center; margin-top: 28px; margin-bottom: 8px;">
+      <a href="https://ko-fi.com/marry2" target="_blank" rel="noopener" style="
+        display: inline-flex; align-items: center; gap: 10px;
+        background: linear-gradient(90deg, #FFDD00, #FFC200);
+        color: #1a1200;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 13px 26px;
+        border-radius: 999px;
+        text-decoration: none;
+        box-shadow: 0 4px 18px rgba(255,200,0,0.35);
+        transition: transform 0.15s, box-shadow 0.15s;
+      " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(255,200,0,0.45)'"
+         onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(255,200,0,0.35)'">
+        <span style="font-size:1.3rem">☕</span>
+        Buy me a coffee
+      </a>
+      <p style="font-size:0.75rem; color:#9098b8; margin-top:10px;">Enjoy using marry? A coffee keeps it running ❤️</p>
+    </div>
+
+    <!-- Visitor Stats Widget -->
+    <div id="visitor-stats" class="card" style="margin-top: 14px; text-align: center; padding: 14px 16px;">
+      <div style="display: flex; justify-content: center; gap: 24px; align-items: center; margin: 4px 0 12px;">
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <span style="font-size: 1.25rem;">👣</span>
+          <div style="text-align: left;">
+            <div id="vis-total" style="font-size: 1.25rem; font-weight: 800; color: #3a5ab0; line-height: 1.1;">0</div>
+            <div style="font-size: 0.72rem; color: #6870a0; font-weight: 600;">Visits</div>
+          </div>
+        </div>
+
+        <div style="width: 1px; height: 24px; background: rgba(140,150,190,0.3);"></div>
+
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <span style="font-size: 1.2rem;">🌐</span>
+          <div style="text-align: left;">
+            <div id="vis-countries" style="font-size: 1.25rem; font-weight: 800; color: #5c73d4; line-height: 1.1;">0</div>
+            <div style="font-size: 0.72rem; color: #6870a0; font-weight: 600;">Countries</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="vis-list" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px;">
+        <span style="font-size: 0.75rem; color: #9098b8;">Loading…</span>
+      </div>
+    </div>
+
+    <div class="footer">marry — for beginners selling digital products overseas. AI can be wrong; use as a starting point.</div>
+  </div>
+
+  <script>
+    // ===== Bahasa =====
+    const BAHASA = [
+      { kode: 'id', nama: 'Bahasa Indonesia' },
+      { kode: 'en', nama: 'English (US/UK/Australia/Int.)' },
+      { kode: 'zh', nama: '中文 (Mandarin/Cina)' },
+      { kode: 'es', nama: 'Español (Spanyol)' },
+      { kode: 'ar', nama: 'العربية (Arab)' },
+      { kode: 'pt', nama: 'Português (Portugis/Brasil)' },
+      { kode: 'fr', nama: 'Français (Prancis)' },
+      { kode: 'de', nama: 'Deutsch (Jerman)' },
+      { kode: 'ja', nama: '日本語 (Jepang)' },
+      { kode: 'ko', nama: '한국어 (Korea)' },
+      { kode: 'it', nama: 'Italiano (Italia)' },
+      { kode: 'nl', nama: 'Nederlands (Belanda)' },
+      { kode: 'pl', nama: 'Polski (Polandia)' },
+      { kode: 'tr', nama: 'Türkçe (Turki)' },
+      { kode: 'ru', nama: 'Русский (Rusia)' },
+      { kode: 'th', nama: 'ภาษาไทย (Thailand)' },
+      { kode: 'vi', nama: 'Tiếng Việt (Vietnam)' },
+      { kode: 'ms', nama: 'Bahasa Melayu (Malaysia)' },
+      { kode: 'hi', nama: 'हिन्दी (Hindi/India)' },
+      { kode: 'bn', nama: 'বাংলা (Bengali/Bangladesh)' },
+      { kode: 'ur', nama: 'اردو (Urdu/Pakistan)' },
+      { kode: 'fa', nama: 'فارسی (Persia/Iran)' },
+      { kode: 'ro', nama: 'Română (Rumania)' },
+      { kode: 'uk', nama: 'Українська (Ukraina)' },
+      { kode: 'el', nama: 'Ελληνικά (Yunani)' },
+      { kode: 'cs', nama: 'Čeština (Ceko)' },
+      { kode: 'sv', nama: 'Svenska (Swedia)' },
+      { kode: 'da', nama: 'Dansk (Denmark)' },
+      { kode: 'no', nama: 'Norsk (Norwegia)' },
+      { kode: 'fi', nama: 'Suomi (Finlandia)' },
+      { kode: 'hu', nama: 'Magyar (Hungaria)' },
+      { kode: 'he', nama: 'עברית (Ibrani)' },
+      { kode: 'en-gb', nama: 'English (UK English)' },
+      { kode: 'en-au', nama: 'English (Australian English)' },
+      { kode: 'en-ca', nama: 'English (Canadian English)' },
+      { kode: 'pt-br', nama: 'Português (Brasil)' },
+      { kode: 'es-mx', nama: 'Español (Meksiko/LATAM)' },
+      { kode: 'zh-tw', nama: '中文繁體 (Taiwan/HK)' },
+      { kode: 'zh-sg', nama: '中文简体 (Singapura)' },
+      { kode: 'ms-bn', nama: 'Bahasa Melayu (Brunei)' },
+      { kode: 'ta', nama: 'தமிழ் (Tamil/India)' },
+      { kode: 'te', nama: 'తెలుగు (Telugu/India)' },
+      { kode: 'ml', nama: 'മലയാളം (Malayalam/India)' },
+      { kode: 'sw', nama: 'Kiswahili (Afrika Timur)' },
+      { kode: 'af', nama: 'Afrikaans (Afrika Selatan)' },
+      { kode: 'et', nama: 'Eesti (Estonia)' },
+      { kode: 'lv', nama: 'Latviešu (Latvia)' },
+      { kode: 'lt', nama: 'Lietuvių (Lithuania)' },
+      { kode: 'sl', nama: 'Slovenščina (Slovenia)' },
+      { kode: 'hr', nama: 'Hrvatski (Kroasia)' },
+      { kode: 'sr', nama: 'Српски (Serbia)' },
+      { kode: 'bg', nama: 'Български (Bulgaria)' },
+      { kode: 'sk', nama: 'Slovenčina (Slovakia)' }
+    ];
+
+    const BAHASA_NAMA = Object.fromEntries(BAHASA.map(b => [b.kode, b.nama]));
+
+    // ===== Locale selector =====
+    const negaraSel = document.getElementById('negara');
+    const localeWrap = document.createElement('div');
+    localeWrap.style.marginTop = '6px';
+    localeWrap.innerHTML = '<select id="locale-select">' + BAHASA.map(b => `<option value="${b.kode}"${b.kode === 'en' ? ' selected' : ''}>${b.nama}</option>`).join('') + '</select>';
+    const langLabel = document.querySelector('.lang-label');
+    langLabel.parentNode.insertBefore(localeWrap, langLabel.nextSibling);
+    const localeSel = document.getElementById('locale-select');
+
+    // ===== Endpoint helper =====
+    async function apiFetch(url, body, lang) {
+      const userOverride = BAHASA_NAMA[lang]
+        ? `OUTPUT ALL RESULTS IN LANGUAGE: ${BAHASA_NAMA[lang]}. Only ${BAHASA_NAMA[lang]}, no mixed translation.`
+        : '';
+      const negara = (negaraSel ? negaraSel.value : '').trim();
+      const negaraMsg = negara ? `\nFOCUS TARGET MARKET ONLY ON THE COUNTRY/REGION: ${negara}. Prioritize and analyze the market, culture, and purchasing behavior for ${negara}.` : '';
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, _bahasa: lang, _negara: negara, _userPrompt: userOverride + negaraMsg })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.error || 'Something went wrong');
+      return data;
+    }
+
+    const btn = document.getElementById('btn');
+    const input = document.getElementById('produk');
+    const status = document.getElementById('status');
+    const errEl = document.getElementById('err');
+    const result = document.getElementById('result');
+    const chips = document.querySelectorAll('.chip');
+
+    chips.forEach(c => c.addEventListener('click', () => {
+      input.value = c.textContent.trim();
+      input.focus();
+    }));
+
+    btn.addEventListener('click', async () => {
+      const produk = input.value.trim();
+      if (!produk) {
+        showErr('Fill in your product idea first 😊');
+        return;
+      }
+      errEl.style.display = 'none';
+      status.style.display = 'block';
+      btn.disabled = true;
+      result.style.display = 'none';
+      try {
+        const data = await apiFetch('/api/analyze', { produk }, localeSel.value);
+        render(data);
+      } catch (e) {
+        showErr(e.message);
+      } finally {
+        status.style.display = 'none';
+        btn.disabled = false;
+      }
+    });
+
+    function showErr(msg) {
+      errEl.textContent = '⚠️ ' + msg;
+      errEl.style.display = 'block';
+    }
+
+    function esc(s) {
+      const div = document.createElement('div');
+      div.textContent = String(s ?? '');
+      return div.innerHTML;
+    }
+
+    function list(items) {
+      if (!Array.isArray(items)) items = [];
+      return items.map(i => '<li>' + esc(i) + '</li>').join('');
+    }
+
+    function render(d) {
+      const verdictCls = (d.rekomendasi || '').toLowerCase().includes('tidak') ? 'tidak'
+        : (d.rekomendasi || '').toLowerCase().includes('hati') ? 'hati' : 'layak';
+      const pct = Math.max(0, Math.min(100, Number(d.skor) || 0));
+      result.innerHTML = `
+        <div class="card">
+          <span class="badge ${verdictCls}">${esc(d.rekomendasi || '—')}</span>
+          <h2>Prospect Score: ${pct}/100</h2>
+          <p class="ringkas">${esc(d.ringkasan || '')}</p>
+
+          <div class="score-row">
+            <div class="ring" style="--p:${pct}%"><span>${pct}</span></div>
+            <div style="flex:1">
+              <div class="meters">
+                <div class="meter-row"><span class="meter-label">🔎 Demand estimate</span><div class="meter"><div class="req" style="width:${clamp(d.estimasiPermintaan)}%"></div></div><span class="meter-val req">${clamp(d.estimasiPermintaan)}</span></div>
+                <div class="meter-row"><span class="meter-label">🥊 Competition level</span><div class="meter"><div class="compet" style="width:${clamp(d.tingkatKompetisi)}%"></div></div><span class="meter-val compet">${clamp(d.tingkatKompetisi)}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="sec"><h3>🌍 Top markets</h3><ul>${list(d.pasarTerbaik)}</ul></div>
+            <div class="sec"><h3>🏪 Selling platforms</h3><ul>${list(d.platform)}</ul></div>
+          </div>
+
+          <div class="sec" style="margin-top:14px">
+            <h3>💰 Optimal price</h3>
+            <p class="price-line"><b>${esc(d.hargaOptimal?.min ?? '—')}–${esc(d.hargaOptimal?.maks ?? '—')} ${esc(d.hargaOptimal?.mataUang ?? 'USD')}</b> · ${esc(d.hargaOptimal?.model ?? '')}</p>
+            <p class="price-note">Estimated income: ${esc(d.estimasiPendapatan || '')}</p>
+          </div>
+
+          <div class="grid" style="margin-top:14px">
+            <div class="sec"><h3>✅ Strengths</h3><ul>${list(d.kelebihan)}</ul></div>
+            <div class="sec"><h3>⚠️ Weaknesses</h3><ul>${list(d.kekurangan)}</ul></div>
+          </div>
+
+          <div class="sec" style="margin-top:14px">
+            <h3>🚀 First steps</h3>
+            <ul>${list(d.langkahPertama)}</ul>
+          </div>
+
+          <div class="sec" style="margin-top:14px">
+            <h3>🗣️ Content language: <span style="text-transform:none;letter-spacing:0;color:#ff9ed0">${esc(d.bahasaKonten || '')}</span></h3>
+          </div>
+
+          <button id="roadmap-btn" class="roadmap-btn">🗺️ See steps from start to end</button>
+          <div id="roadmap-box" class="roadmap"></div>
+        </div>`;
+      result.style.display = 'block';
+      result.scrollIntoView({ behavior: 'smooth' });
+
+      // Roadmap: kaitkan tombol per hasil
+      const rmBtn = document.getElementById('roadmap-btn');
+      const rmBox = document.getElementById('roadmap-box');
+      if (rmBtn && rmBox) {
+        rmBox.style.display = 'none';
+        rmBtn.style.display = 'block';
+        const roadmapProduct = input.value.trim();
+        rmBox.dataset.produk = roadmapProduct;
+        rmBtn.onclick = () => loadRoadmap(rmBtn, rmBox, roadmapProduct);
+      }
+    }
+
+    async function loadRoadmap(btn, box, produk) {
+      if (box.style.display === 'block' && box.dataset.loaded) { btn.textContent = '🗺️ See steps from start to end'; box.style.display = 'none'; return; }
+      btn.disabled = true;
+      btn.textContent = '⏳ Building the plan…';
+      box.style.display = 'block';
+      box.innerHTML = '<div id="spinner" style="margin:14px auto"></div><p style="text-align:center;color:#a9a2d6;font-size:0.85rem">AI is drafting the plan from start to end…</p>';
+      try {
+        const d = await apiFetch('/api/roadmap', { produk }, localeSel.value);
+        box.innerHTML = renderRoadmap(d);
+        box.dataset.loaded = '1';
+        btn.textContent = '🗺️ Hide steps';
+      } catch (e) {
+        box.innerHTML = '<span class="error" style="display:block">⚠️ ' + esc(e.message) + '</span>';
+        btn.textContent = '🗺️ Try again';
+      }
+      btn.disabled = false;
+    }
+
+    function renderRoadmap(d) {
+      if (!d || !Array.isArray(d.fase)) return '<span class="error" style="display:block">Response format error.</span>';
+      const phases = d.fase.map((f, i) => `
+        <div class="phase">
+          <b>${esc(f.nama || 'Phase ' + (i + 1))}</b> <span class="dur">· ${esc(f.durasi || '')}</span>
+          <p>${esc(f.tujuan || '')}</p>
+          <ul>${(f.kegiatan || []).map(k => '<li>' + esc(k) + '</li>').join('')}</ul>
+          ${f.keluaran ? `<div class="outcome"><b>Result:</b> ${esc(f.keluaran)}</div>` : ''}
+        </div>`).join('');
+      return `
+        <h3 class="rd-title">🧭 Execution plan</h3>
+        <p class="ringkas">${esc(d.ringkasan || '')}</p>
+        <p style="font-size:0.9rem;color:#ff9ed0">⏱️ Estimated total time: <b>${esc(d.totalWaktu || '—')}</b></p>
+        <div class="phases">${phases}</div>`;
+    }
+
+    function clamp(n) {
+      n = Number(n);
+      if (Number.isNaN(n)) return 0;
+      return Math.max(0, Math.min(100, Math.round(n)));
+    }
+
+    // ===== Daftar ide produk =====
+    const ideFilter = document.getElementById('ide-filter');
+    const ideList = document.getElementById('ide-list');
+    let IDE = { kategori: [] };
+
+    function renderIde() {
+      const sel = ideFilter.value;
+      const rows = sel === 'all'
+        ? IDE.kategori.flatMap(k => k.items.map(t => ({ kat: k.ikon + ' ' + k.nama, teks: t })))
+        : IDE.kategori.filter(k => k.nama === sel).flatMap(k => k.items.map(t => ({ kat: k.ikon + ' ' + k.nama, teks: t })));
+      ideList.innerHTML = rows.map((r, i) =>
+        `<div class="ide-item" data-i="${i}">${esc(r.teks)}<span class="cat">${esc(r.kat)}</span></div>`
+      ).join('');
+      document.querySelectorAll('.counter').forEach(c => c.remove());
+      const cnt = document.createElement('div');
+      cnt.className = 'counter';
+      cnt.textContent = rows.length + ' ideas shown · click one to analyze';
+      ideList.after(cnt);
+      ideList.querySelectorAll('.ide-item').forEach(el => el.addEventListener('click', () => {
+        input.value = el.childNodes[0].textContent.trim();
+        ideList.querySelectorAll('.ide-item').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        input.focus();
+      }));
+    }
+
+    fetch('ide-prospek.json')
+      .then(r => r.json())
+      .then(d => {
+        IDE = d;
+        // isi dropdown kategori
+        const optAll = ideFilter.options[0];
+        d.kategori.forEach(k => {
+          const o = document.createElement('option');
+          o.value = k.nama;
+          o.textContent = `${k.ikon} ${k.nama} (${k.items.length})`;
+          ideFilter.appendChild(o);
+        });
+        renderIde();
+      })
+      .catch(() => { ideList.innerHTML = '<div class="hint">Failed to load ideas. Try refreshing.</div>'; });
+
+    ideFilter.addEventListener('change', renderIde);
+
+    // ===== Visitor Stats =====
+    async function loadVisitorStats() {
+      try {
+        const res = await fetch('/api/visitors');
+        if (!res.ok) return;
+        const data = await res.json();
+        const totalEl = document.getElementById('vis-total');
+        const countEl = document.getElementById('vis-countries');
+        const listEl = document.getElementById('vis-list');
+        if (totalEl) totalEl.textContent = Number(data.total || 0).toLocaleString();
+        if (countEl) countEl.textContent = Number(data.uniqueCountries || 0).toLocaleString();
+        if (listEl) {
+          if (Array.isArray(data.topCountries) && data.topCountries.length > 0) {
+            listEl.replaceChildren();
+            data.topCountries.forEach(c => {
+              const pill = document.createElement('span');
+              pill.style.cssText = 'display:inline-flex; align-items:center; gap:7px; background:rgba(255,255,255,0.88); border:1px solid rgba(140,150,190,0.35); padding:5px 12px; border-radius:999px; font-size:0.82rem; box-shadow:0 1px 4px rgba(90,100,140,0.08);';
+
+              const code = String(c.code || '').toLowerCase();
+              if (/^[a-z]{2}$/.test(code)) {
+                const img = document.createElement('img');
+                img.src = `https://flagcdn.com/w40/${code}.png`;
+                img.srcset = `https://flagcdn.com/w80/${code}.png 2x`;
+                img.width = 22;
+                img.height = 15;
+                img.alt = String(c.name || 'Country flag');
+                img.style.cssText = 'border-radius:2px; vertical-align:middle; object-fit:cover; box-shadow:0 1px 3px rgba(0,0,0,0.18);';
+                img.onerror = () => img.replaceWith(document.createTextNode(String(c.flag || '🌐')));
+                pill.append(img);
+              } else {
+                const flag = document.createElement('span');
+                flag.style.cssText = 'font-size:1.15rem; line-height:1;';
+                flag.textContent = String(c.flag || '🌐');
+                pill.append(flag);
+              }
+
+              const name = document.createElement('span');
+              name.style.cssText = 'color:#2a2d3e; font-weight:600;';
+              name.textContent = String(c.name || 'Unknown');
+              pill.append(name);
+
+              const count = document.createElement('span');
+              count.style.cssText = 'background:rgba(92,115,212,0.15); color:#3a5ab0; font-size:0.75rem; font-weight:700; padding:1px 7px; border-radius:99px;';
+              count.textContent = String(Number(c.count || 0));
+              pill.append(count);
+              listEl.append(pill);
+            });
+          } else {
+            listEl.innerHTML = '<span style="font-size: 0.75rem; color: #9098b8;">No visits recorded yet</span>';
+          }
+        }
+      } catch (e) {}
+    }
+    loadVisitorStats();
+    setInterval(loadVisitorStats, 20000); // Live refresh every 20s
+  </script>
+</body>
+</html>
