@@ -6,3 +6,4 @@ visitors.json
 *-test*.json
 test-*.json
 raw-test.json
+.opencode/

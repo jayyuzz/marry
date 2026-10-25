@@ -446,14 +446,138 @@
     .ide-item { background: rgba(226,250,211,0.045); border-color: rgba(182,219,161,0.14); box-shadow: 4px 5px 12px rgba(0,18,8,0.12); }
     .ide-item:hover, .ide-item.active { background: rgba(126,190,101,0.16); border-color: #8dbf71; }
     select option { background: #173b28; color: var(--ink); }
+
+    /* Flat paper / editorial scrapbook theme */
+    :root {
+      --ink: #20241f;
+      --muted: #62695d;
+      --subtle: #858d7d;
+      --line: #d9d3c4;
+      --violet: #6e9470;
+      --cyan: #9dbb85;
+      --pink: #df8f72;
+      --paper: #f5f0e4;
+      --paper-deep: #e9e0cf;
+      --shadow-3d: 5px 7px 0 rgba(37, 48, 35, 0.12), 0 18px 30px rgba(59, 66, 49, 0.1);
+    }
+    html { background: #d7d0c0; }
+    body {
+      color: var(--ink);
+      background-color: #d7d0c0;
+      background-image: radial-gradient(rgba(48,56,42,0.08) 0.7px, transparent 0.7px), linear-gradient(135deg, rgba(255,255,255,0.35), transparent 42%), linear-gradient(45deg, rgba(119,105,83,0.05), transparent 50%);
+      background-size: 7px 7px, auto, auto;
+    }
+    body::before, body::after { width: 180px; height: 180px; filter: none; opacity: 0.16; background: #c6d4a8; border-radius: 48% 52% 58% 42%; transform: rotate(-12deg); }
+    body::before { top: 8%; left: -90px; }
+    body::after { right: -90px; bottom: 10%; background: #e5b09b; transform: rotate(18deg); }
+    header {
+      min-height: 300px;
+      border: 2px solid #30382e;
+      border-radius: 8px 22px 10px 18px;
+      background-color: var(--paper);
+      background-image: radial-gradient(rgba(48,56,42,0.06) 0.7px, transparent 0.7px), linear-gradient(160deg, rgba(255,255,255,0.62), transparent 56%);
+      background-size: 6px 6px, auto;
+      box-shadow: 8px 9px 0 #b0a58e, 0 18px 28px rgba(49,55,43,0.12);
+      transform: rotate(-0.35deg);
+    }
+    header::before { inset: 10px; border: 1px dashed rgba(63,78,56,0.24); border-radius: 5px 16px 7px 13px; background: none; }
+    header img { border: 2px solid #30382e; border-radius: 50%; background: #d9e5bd; box-shadow: 3px 4px 0 rgba(48,56,42,0.2); }
+    header h1 { background: linear-gradient(105deg, #28362b, #628866 60%, #d27f62); -webkit-background-clip: text; background-clip: text; text-shadow: none; }
+    header p { color: #60695a; }
+    .hero-badge { color: #3e6144; border: 1px solid #8eaa88; background: #dce8c4; border-radius: 4px 12px 5px 10px; box-shadow: 2px 3px 0 rgba(75,96,63,0.16); letter-spacing: 0.1em; }
+    .hero-badge::before { background: #6c946c; box-shadow: none; }
+    .hero-stat { border: 1px solid #d3c9b6; border-radius: 6px 12px 5px 10px; background: rgba(255,252,241,0.72); box-shadow: 3px 4px 0 rgba(88,78,59,0.12); }
+    .hero-stat b { color: #273329; }
+    .hero-stat span { color: #7a816f; }
+    .hero-scene { filter: none; }
+    .hero-orb { inset: 62px; border-radius: 50% 45% 53% 47%; background: #accb8f; box-shadow: 8px 9px 0 #66866a, inset 6px 7px 0 rgba(255,255,255,0.42); transform: rotate(-8deg); animation: floatOrb 7s ease-in-out infinite; }
+    .hero-orb::after { inset: 14% 20% 54% 18%; background: #e8efd3; filter: none; transform: rotate(-18deg); opacity: 0.78; }
+    .hero-orbit { border: 2px dashed #d1856c; box-shadow: none; transform: rotateX(63deg) rotateZ(-18deg); }
+    .hero-orbit::after { width: 12px; height: 12px; background: #d1856c; box-shadow: 2px 2px 0 rgba(68,52,39,0.18); }
+    .hero-orbit.two { border-color: #789d75; }
+    .hero-orbit.two::after { background: #789d75; box-shadow: 2px 2px 0 rgba(68,52,39,0.18); }
+    .hero-slime {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 148px;
+      height: 132px;
+      z-index: 2;
+      border: 3px solid #3e6046;
+      border-radius: 54% 46% 48% 52% / 58% 58% 42% 42%;
+      background: linear-gradient(145deg, #d6eaa7 0%, #a9ce82 42%, #78a96f 100%);
+      box-shadow: 8px 10px 0 #5c8663, inset 8px 8px 0 rgba(245,255,215,0.5), inset -9px -10px 0 rgba(62,96,70,0.13);
+      transform: translate(-50%, -50%) rotate(-5deg);
+      animation: slimeBounce 9s ease-in-out infinite;
+    }
+    .hero-slime::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      top: 18px;
+      width: 50px;
+      height: 25px;
+      border-radius: 50%;
+      background: rgba(250,255,222,0.78);
+      transform: rotate(-24deg);
+    }
+    .slime-eye { position: absolute; top: 57px; width: 13px; height: 20px; border-radius: 50%; background: #304c38; box-shadow: inset 3px 3px 0 rgba(255,255,255,0.75); }
+    .slime-eye.left { left: 45px; }
+    .slime-eye.right { right: 41px; }
+    .slime-mouth { position: absolute; left: 50%; top: 82px; width: 25px; height: 14px; border-bottom: 3px solid #38583f; border-radius: 0 0 50% 50%; transform: translateX(-50%); }
+    .slime-cheek { position: absolute; top: 82px; width: 15px; height: 8px; border-radius: 50%; background: #df8f72; opacity: 0.72; }
+    .slime-cheek.left { left: 27px; transform: rotate(-12deg); }
+    .slime-cheek.right { right: 24px; transform: rotate(12deg); }
+    .slime-arm { position: absolute; top: 94px; width: 24px; height: 13px; border: 3px solid #3e6046; border-top: 0; border-radius: 0 0 18px 18px; background: #a9cc81; }
+    .slime-arm.left { left: -17px; transform: rotate(22deg); }
+    .slime-arm.right { right: -17px; transform: rotate(-22deg); }
+    .slime-spark { position: absolute; right: 3px; top: -13px; color: #d1856c; font-size: 1.35rem; font-weight: 800; transform: rotate(12deg); }
+    .slime-leaf { position: absolute; left: 71px; top: -26px; width: 25px; height: 42px; border: 3px solid #3e6046; border-radius: 100% 0 100% 0; background: #78a96f; transform: rotate(24deg); box-shadow: inset 4px 3px 0 rgba(227,244,178,0.42); }
+    .slime-leaf::after { content: ''; position: absolute; left: 10px; top: 5px; width: 3px; height: 29px; border-radius: 4px; background: #dbe9ad; transform: rotate(21deg); }
+    @keyframes slimeBounce { 0%, 100% { transform: translate(-50%, -50%) rotate(-5deg) scale(1); } 50% { transform: translate(-50%, -55%) rotate(3deg) scale(1.035, 0.98); } }
+    .card {
+      border: 2px solid #454d40;
+      border-radius: 7px 18px 9px 15px;
+      background-color: var(--paper);
+      background-image: radial-gradient(rgba(48,56,42,0.055) 0.65px, transparent 0.65px), linear-gradient(145deg, rgba(255,255,255,0.55), transparent 60%);
+      background-size: 6px 6px, auto;
+      box-shadow: 5px 7px 0 rgba(67,77,59,0.17), 0 15px 24px rgba(65,67,54,0.1);
+      backdrop-filter: none;
+    }
+    .card::before { inset: 9px; border: 1px dashed rgba(84,96,72,0.15); border-radius: 4px 12px 6px 10px; background: none; }
+    label { color: #394335; }
+    textarea, input[type="text"], select { border: 2px solid #bcb5a5; border-radius: 5px 10px 6px 9px; background: rgba(255,252,242,0.75); color: var(--ink); box-shadow: inset 2px 2px 0 rgba(83,78,64,0.06); }
+    textarea::placeholder, input[type="text"]::placeholder { color: #9a9b8d; }
+    textarea:focus, input[type="text"]:focus, select:focus { outline: 3px solid rgba(111,150,112,0.25); border-color: #739672; }
+    .hint, .price-note, .footer, .counter { color: #858a7b; }
+    .chip { color: #4d704e; border: 1px solid #a8bd91; border-radius: 5px 12px 4px 10px; background: #e4eccf; box-shadow: 2px 3px 0 rgba(81,98,64,0.14); }
+    .chip:hover { background: #d5e4bc; transform: translate(-1px, -2px) rotate(-1deg); }
+    button { border: 2px solid #364a38; border-radius: 5px 14px 6px 12px; color: #fffef4; background: #557e5c; box-shadow: 4px 5px 0 #324a37, 0 10px 15px rgba(49,73,51,0.14); }
+    button:hover { transform: translate(-1px, -3px) rotate(-0.4deg); }
+    button::after { display: none; }
+    .ring { background: conic-gradient(#6d946d var(--p, 0%), #d9dfcc 0); box-shadow: 4px 5px 0 rgba(62,77,56,0.16); }
+    .ring span { background: #fffaf0; color: #334532; border: 2px solid #d1c8b7; box-shadow: inset 2px 2px 0 rgba(72,72,58,0.06); }
+    .meter { background: #dce2d2; border: 1px solid #c3cdbb; }
+    .sec h3 { color: #6e7c67; }
+    .result h2, .sec li, .phase li, .price-line { color: #293329; }
+    .roadmap { border-top: 2px dashed #c5bbaa; }
+    .roadmap-btn { color: #4d704e; border: 2px solid #8daa83; border-radius: 5px 14px 6px 12px; background: #e4eccf; box-shadow: 3px 4px 0 rgba(81,98,64,0.12); }
+    .roadmap-btn:hover { background: #d5e4bc; }
+    .phase { border-left: 3px solid #789b72; }
+    .phase::before { background: #d1856c; box-shadow: 2px 2px 0 rgba(68,52,39,0.18); }
+    .outcome { color: #4c7655; background: #e2edd4; border: 1px solid #a9c394; border-radius: 4px 10px 5px 8px; }
+    .ide-item { color: #303a30; background: rgba(255,252,241,0.66); border: 1px solid #c9c0ae; border-radius: 5px 10px 4px 8px; box-shadow: 2px 3px 0 rgba(81,75,59,0.1); }
+    .ide-item:hover, .ide-item.active { background: #e4eccf; border-color: #759a72; transform: translateX(3px) rotate(-0.2deg); }
+    .ide-item .cat { color: #8a8d7e; }
+    select option { background: #f5f0e4; color: #20241f; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="hero-copy">
-        <img src="logo.svg" alt="marry logo" style="width:72px;height:72px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;">
-        <div class="hero-badge">AI market lab · nature 3D</div>
+        <img src="logo-eye.svg" alt="marry market globe logo" style="width:72px;height:72px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;">
+        <div class="hero-badge">AI market lab · paper edition</div>
         <h1>marry</h1>
         <p>Turn your small digital product into a sharper global opportunity with fast, visual market intelligence.</p>
         <div class="hero-meta" aria-label="Product highlights">
@@ -465,7 +589,17 @@
       <div class="hero-scene" aria-hidden="true">
         <div class="hero-orbit"></div>
         <div class="hero-orbit two"></div>
-        <div class="hero-orb"></div>
+        <div class="hero-slime" aria-label="Cute green slime mascot">
+          <span class="slime-leaf"></span>
+          <span class="slime-eye left"></span>
+          <span class="slime-eye right"></span>
+          <span class="slime-cheek left"></span>
+          <span class="slime-cheek right"></span>
+          <span class="slime-mouth"></span>
+          <span class="slime-arm left"></span>
+          <span class="slime-arm right"></span>
+          <span class="slime-spark">✦</span>
+        </div>
       </div>
     </header>
 
@@ -626,6 +760,20 @@
     langLabel.parentNode.insertBefore(localeWrap, langLabel.nextSibling);
     const localeSel = document.getElementById('locale-select');
 
+    // ===== Device ID Helper =====
+    function getDeviceId() {
+      try {
+        let did = localStorage.getItem('marry_did');
+        if (!did) {
+          did = 'did_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+          localStorage.setItem('marry_did', did);
+        }
+        return did;
+      } catch (e) {
+        return 'did_fallback';
+      }
+    }
+
     // ===== Endpoint helper =====
     async function apiFetch(url, body, lang) {
       const userOverride = BAHASA_NAMA[lang]
@@ -633,13 +781,23 @@
         : '';
       const negara = (negaraSel ? negaraSel.value : '').trim();
       const negaraMsg = negara ? `\nFOCUS TARGET MARKET ONLY ON THE COUNTRY/REGION: ${negara}. Prioritize and analyze the market, culture, and purchasing behavior for ${negara}.` : '';
+      const did = getDeviceId();
       const resp = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...body, _bahasa: lang, _negara: negara, _userPrompt: userOverride + negaraMsg })
+        headers: {
+          'Content-Type': 'application/json',
+          'x-device-id': did
+        },
+        body: JSON.stringify({ ...body, _bahasa: lang, _negara: negara, _deviceId: did, _userPrompt: userOverride + negaraMsg })
       });
       const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(data.error || 'Something went wrong');
+      if (!resp.ok) {
+        const err = new Error(data.message || data.error || 'Something went wrong');
+        err.code = data.error;
+        err.status = resp.status;
+        err.data = data;
+        throw err;
+      }
       return data;
     }
 
@@ -669,7 +827,23 @@
         const data = await apiFetch('/api/analyze', { produk }, localeSel.value);
         render(data);
       } catch (e) {
-        showErr(e.message);
+        if (e.code === 'LIMIT_REACHED') {
+          errEl.innerHTML = `
+            <div style="background: rgba(255,170,0,0.12); border: 1px solid rgba(255,190,0,0.4); border-radius: 16px; padding: 20px 16px; text-align: center; margin-top: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+              <div style="font-size: 1.8rem; margin-bottom: 4px;">🔒</div>
+              <div style="color: #ffe07a; font-weight: 800; font-size: 1.05rem;">Free Guest Limit Reached (1/1)</div>
+              <p style="color: #c9dec5; font-size: 0.86rem; margin: 8px auto 14px; max-width: 440px; line-height: 1.45;">
+                You've used your 1 free product analysis. Join Membership to unlock unlimited analyses and step-by-step roadmaps!
+              </p>
+              <a href="https://ko-fi.com/marry2" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:8px; background: linear-gradient(90deg, #FFDD00, #FFC200); color:#1a1200; font-weight:800; font-size:0.92rem; padding:11px 24px; border-radius:999px; text-decoration:none; box-shadow: 0 4px 16px rgba(255,200,0,0.3);">
+                <span>👑</span> Join Membership on Ko-fi
+              </a>
+            </div>
+          `;
+          errEl.style.display = 'block';
+        } else {
+          showErr(e.message);
+        }
       } finally {
         status.style.display = 'none';
         btn.disabled = false;
@@ -767,8 +941,24 @@
         box.dataset.loaded = '1';
         btn.textContent = '🗺️ Hide steps';
       } catch (e) {
-        box.innerHTML = '<span class="error" style="display:block">⚠️ ' + esc(e.message) + '</span>';
-        btn.textContent = '🗺️ Try again';
+        if (e.code === 'MEMBERSHIP_REQUIRED' || e.status === 403) {
+          box.innerHTML = `
+            <div style="background: linear-gradient(135deg, rgba(255,221,0,0.14), rgba(255,180,0,0.06)); border: 1px solid rgba(255,221,0,0.38); border-radius: 16px; padding: 22px 18px; text-align: center; margin-top: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+              <div style="font-size: 2.2rem; margin-bottom: 6px;">👑</div>
+              <h4 style="font-size: 1.15rem; color: #ffd644; font-weight: 800; margin-bottom: 6px;">Execution Roadmap is for Members Only</h4>
+              <p style="font-size: 0.88rem; color: #d0e0cf; max-width: 460px; margin: 0 auto 16px; line-height: 1.5;">
+                Get complete 4–7 phase launch execution plans, validation strategies, and actionable steps by joining Marry Membership.
+              </p>
+              <a href="https://ko-fi.com/marry2" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(90deg, #FFDD00, #FFC200); color: #1a1200; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem; padding: 12px 26px; border-radius: 999px; text-decoration: none; box-shadow: 0 4px 18px rgba(255,200,0,0.35); transition: transform 0.15s;">
+                <span>⭐</span> Join Membership on Ko-fi
+              </a>
+            </div>
+          `;
+          btn.textContent = '🔒 Member Exclusive';
+        } else {
+          box.innerHTML = '<span class="error" style="display:block">⚠️ ' + esc(e.message) + '</span>';
+          btn.textContent = '🗺️ Try again';
+        }
       }
       btn.disabled = false;
     }

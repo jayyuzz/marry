@@ -13,6 +13,12 @@ import {
   normalizeRoadmapResult,
   parseJSON
 } from './ai-utils.js';
+import {
+  checkGuestLimit,
+  incrementGuestUsage,
+  recordVisitorCountry,
+  getVisitorStatsFromDb
+} from './supabase.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -33,6 +39,12 @@ const AI_RATE_LIMIT = 20;
 
 function clientIp(req) {
   return req.ip || req.socket.remoteAddress || 'local';
+}
+
+function clientId(req) {
+  const ip = clientIp(req);
+  const deviceId = req.headers['x-device-id'] || req.body?._deviceId || '';
+  return deviceId ? `${ip}_${deviceId}` : ip;
 }
 
 function isLocalIp(ip) {
@@ -108,6 +120,9 @@ app.use((req, res, next) => {
         if (!v.countries) v.countries = {};
         v.countries[country] = { count: ((v.countries[country]?.count) || 0) + 1, flag, code: code || v.countries[country]?.code || 'id' };
         saveVisitors(v);
+
+        // Record to Supabase
+        await recordVisitorCountry({ country, code, flag });
       } catch {}
     })();
   }
@@ -117,9 +132,20 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // GET /api/visitors — return visitor stats & active online
-app.get('/api/visitors', (req, res) => {
+app.get('/api/visitors', async (req, res) => {
   const ip = clientIp(req);
   activeVisitors.set(ip, Date.now());
+
+  // Try Supabase first
+  const dbStats = await getVisitorStatsFromDb();
+  if (dbStats && dbStats.total > 0) {
+    return res.json({
+      ...dbStats,
+      online: getOnlineCount()
+    });
+  }
+
+  // Fallback to local
   const v = loadVisitors();
   const topCountries = Object.entries(v.countries || {})
     .sort((a, b) => b[1].count - a[1].count)
@@ -265,9 +291,25 @@ app.post('/api/analyze', aiRateLimit, async (req, res) => {
   if (!input) return res.status(400).json({ error: 'Fill in your product idea first.' });
   if (input.length > 500) return res.status(400).json({ error: 'Description too long (max 500 characters).' });
 
+  const id = clientId(req);
+  const limitCheck = await checkGuestLimit(id);
+  if (!limitCheck.allowed) {
+    return res.status(403).json({
+      error: 'LIMIT_REACHED',
+      limitReached: true,
+      isMember: false,
+      message: 'Free guest limit reached (1/1 analysis). Join membership to get unlimited analyses & roadmaps!'
+    });
+  }
+
   try {
     const result = normalizeAnalysisResult(await callAI(input, { user: bahasaUser || undefined }));
-    res.json(result);
+    await incrementGuestUsage(id);
+    res.json({
+      ...result,
+      isMember: limitCheck.isMember,
+      remainingFree: limitCheck.isMember ? 999 : 0
+    });
   } catch (e) {
     res.status(e.status || 500).json({ error: e.message });
   }
@@ -278,6 +320,16 @@ app.post('/api/roadmap', aiRateLimit, async (req, res) => {
   const bahasaUser = (req.body?._userPrompt || '').trim();
   if (!input) return res.status(400).json({ error: 'Fill in your product idea first.' });
   if (input.length > 500) return res.status(400).json({ error: 'Description too long (max 500 characters).' });
+
+  const id = clientId(req);
+  const limitCheck = await checkGuestLimit(id);
+  if (!limitCheck.isMember) {
+    return res.status(403).json({
+      error: 'MEMBERSHIP_REQUIRED',
+      membershipRequired: true,
+      message: 'Execution roadmap is exclusive to members. Unlock full step-by-step guidance with Membership!'
+    });
+  }
 
   try {
     const result = normalizeRoadmapResult(await callAI(input, {
@@ -290,6 +342,18 @@ app.post('/api/roadmap', aiRateLimit, async (req, res) => {
   }
 });
 
+// Check guest limit status endpoint
+app.get('/api/me', async (req, res) => {
+  const id = clientId(req);
+  const status = await checkGuestLimit(id);
+  res.json({
+    id,
+    isMember: status.isMember,
+    count: status.count,
+    allowed: status.allowed
+  });
+});
+
 // Keep API errors JSON-shaped and avoid exposing Express/body-parser stack traces.
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
@@ -300,11 +364,16 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: 'Internal server error.' });
 });
 
-let server = app.listen(PORT, () => {
-  console.log(`marry berjalan → http://localhost:${PORT}`);
-});
+let server;
+if (!process.env.VERCEL) {
+  server = app.listen(PORT, () => {
+    console.log(`marry berjalan → http://localhost:${PORT}`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  server.close(() => process.exit(0));
+  if (server) server.close(() => process.exit(0));
 });
+
+export default app;
