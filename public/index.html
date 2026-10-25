@@ -856,19 +856,37 @@
   <div id="auth-modal" class="modal-backdrop">
     <div class="modal-card">
       <button class="modal-close" id="close-auth-modal">✕</button>
-      <div class="auth-tabs">
+      
+      <div id="auth-tabs-wrap" class="auth-tabs">
         <button class="auth-tab active" id="tab-login">Sign In</button>
         <button class="auth-tab" id="tab-register">Create Account</button>
       </div>
 
+      <!-- Sign In / Register Form -->
       <form id="auth-form">
+        <!-- Honeypot anti-bot field -->
+        <input type="text" id="auth-hp" name="hp_confirm" style="display:none!important;" tabindex="-1" autocomplete="off">
+
         <div style="margin-bottom: 12px; text-align: left;">
           <label style="font-size:0.82rem; font-weight:700; color:#5a607a;">Email Address</label>
           <input type="email" id="auth-email" required placeholder="name@example.com" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(140,150,190,0.4); margin-top:4px;">
         </div>
-        <div style="margin-bottom: 16px; text-align: left;">
+
+        <div style="margin-bottom: 14px; text-align: left;">
           <label style="font-size:0.82rem; font-weight:700; color:#5a607a;">Password</label>
           <input type="password" id="auth-password" required minlength="6" placeholder="At least 6 characters" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(140,150,190,0.4); margin-top:4px;">
+        </div>
+
+        <!-- Anti-Spam Human Verification Shield (for Register) -->
+        <div id="captcha-wrap" style="display:none; margin-bottom: 16px; text-align: left; background: rgba(92,115,212,0.08); border: 1px solid rgba(92,115,212,0.22); border-radius: 12px; padding: 10px 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-size:0.8rem; font-weight:700; color:#3a5ab0; margin:0;">🛡️ Anti-Spam Shield</label>
+            <span style="font-size:0.75rem; color:#7880a0;">Solve to verify human</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="captcha-question" style="font-weight:800; font-size:1rem; color:#2a2d3e; background:#fff; padding:6px 12px; border-radius:8px; border:1px solid rgba(140,150,190,0.3);">? + ? =</span>
+            <input type="number" id="auth-captcha" placeholder="Answer" style="flex:1; width:auto; padding:8px 12px; border-radius:8px; border:1px solid rgba(140,150,190,0.4);">
+          </div>
         </div>
 
         <button type="submit" id="auth-submit-btn" style="width:100%; padding:12px; font-weight:800; border-radius:10px; background:linear-gradient(90deg, #5c73d4, #8fa3f0); color:#fff; border:none; cursor:pointer;">
@@ -876,6 +894,30 @@
         </button>
         <div id="auth-msg" style="margin-top:12px; font-size:0.85rem; display:none;"></div>
       </form>
+
+      <!-- OTP / Email Verification Screen -->
+      <div id="auth-otp-wrap" style="display:none; text-align:center;">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">✉️</div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #2a2d3e; margin-bottom: 6px;">Verify Your Email</h3>
+        <p style="font-size: 0.85rem; color: #5a607a; margin-bottom: 16px; line-height: 1.45;">
+          We sent a 6-digit confirmation code to <b id="otp-target-email" style="color:#3a5ab0;"></b>.<br>Enter the code below to verify your account:
+        </p>
+
+        <div style="margin-bottom: 16px;">
+          <input type="text" id="otp-input" maxlength="8" placeholder="123456" style="width: 220px; text-align: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 6px; padding: 10px; border-radius: 12px; border: 2px solid rgba(92,115,212,0.4); color: #2a2d3e;">
+        </div>
+
+        <button id="otp-verify-btn" style="width:100%; padding:12px; font-weight:800; border-radius:10px; background:linear-gradient(90deg, #5c73d4, #8fa3f0); color:#fff; border:none; cursor:pointer;">
+          Verify & Log In
+        </button>
+        <div id="otp-msg" style="margin-top:10px; font-size:0.84rem; display:none;"></div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:18px; font-size:0.8rem;">
+          <a href="#" id="otp-resend-btn" style="color:#3a5ab0; text-decoration:none; font-weight:600;">🔄 Resend code</a>
+          <a href="#" id="otp-back-btn" style="color:#7880a0; text-decoration:none;">← Back to Sign In</a>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1440,6 +1482,124 @@
       if (e.target === membershipModal) membershipModal.style.display = 'none';
     });
 
+    // Anti-spam math captcha state
+    let captchaExpected = 0;
+    const captchaWrap = document.getElementById('captcha-wrap');
+    const captchaQuestion = document.getElementById('captcha-question');
+    const captchaInput = document.getElementById('auth-captcha');
+    const authHp = document.getElementById('auth-hp');
+
+    function refreshCaptcha() {
+      const a = Math.floor(Math.random() * 8) + 2;
+      const b = Math.floor(Math.random() * 8) + 2;
+      captchaExpected = a + b;
+      if (captchaQuestion) captchaQuestion.textContent = `${a} + ${b} =`;
+      if (captchaInput) captchaInput.value = '';
+    }
+
+    // OTP Elements
+    const authTabsWrap = document.getElementById('auth-tabs-wrap');
+    const authOtpWrap = document.getElementById('auth-otp-wrap');
+    const otpTargetEmail = document.getElementById('otp-target-email');
+    const otpInput = document.getElementById('otp-input');
+    const otpVerifyBtn = document.getElementById('otp-verify-btn');
+    const otpMsg = document.getElementById('otp-msg');
+    const otpResendBtn = document.getElementById('otp-resend-btn');
+    const otpBackBtn = document.getElementById('otp-back-btn');
+    let pendingOtpEmail = '';
+
+    function showOtpView(email) {
+      pendingOtpEmail = email;
+      if (otpTargetEmail) otpTargetEmail.textContent = email;
+      if (authForm) authForm.style.display = 'none';
+      if (authTabsWrap) authTabsWrap.style.display = 'none';
+      if (authOtpWrap) authOtpWrap.style.display = 'block';
+      if (otpInput) { otpInput.value = ''; otpInput.focus(); }
+      if (otpMsg) otpMsg.style.display = 'none';
+    }
+
+    function showFormView() {
+      if (authForm) authForm.style.display = 'block';
+      if (authTabsWrap) authTabsWrap.style.display = 'flex';
+      if (authOtpWrap) authOtpWrap.style.display = 'none';
+      if (authMsg) authMsg.style.display = 'none';
+    }
+
+    if (otpBackBtn) otpBackBtn.onclick = (e) => {
+      e.preventDefault();
+      showFormView();
+    };
+
+    if (otpResendBtn) otpResendBtn.onclick = async (e) => {
+      e.preventDefault();
+      if (!sbClient || !pendingOtpEmail) return;
+      otpResendBtn.textContent = 'Sending…';
+      try {
+        const { error } = await sbClient.auth.resend({ type: 'signup', email: pendingOtpEmail });
+        if (error) throw error;
+        showOtpMsg('New verification code sent! Check your inbox.', true);
+      } catch (err) {
+        showOtpMsg(err.message || 'Failed to resend code.', false);
+      } finally {
+        setTimeout(() => { otpResendBtn.textContent = '🔄 Resend code'; }, 2000);
+      }
+    };
+
+    if (otpVerifyBtn) otpVerifyBtn.onclick = async () => {
+      const token = (otpInput?.value || '').trim();
+      if (!token) {
+        showOtpMsg('Please enter the verification code.', false);
+        return;
+      }
+      otpVerifyBtn.disabled = true;
+      otpVerifyBtn.textContent = 'Verifying…';
+      otpMsg.style.display = 'none';
+
+      try {
+        // Try signup verification first
+        let { data, error } = await sbClient.auth.verifyOtp({
+          email: pendingOtpEmail,
+          token,
+          type: 'signup'
+        });
+
+        // Fallback to email verification type
+        if (error) {
+          const res2 = await sbClient.auth.verifyOtp({
+            email: pendingOtpEmail,
+            token,
+            type: 'email'
+          });
+          if (!res2.error) {
+            data = res2.data;
+            error = null;
+          }
+        }
+
+        if (error) throw error;
+
+        showOtpMsg('Email verified & signed in! 🎉', true);
+        currentUser = data?.user || null;
+        updateUserNav();
+        setTimeout(() => {
+          authModal.style.display = 'none';
+          showFormView();
+        }, 1000);
+      } catch (err) {
+        showOtpMsg(err.message || 'Invalid or expired code.', false);
+      } finally {
+        otpVerifyBtn.disabled = false;
+        otpVerifyBtn.textContent = 'Verify & Log In';
+      }
+    };
+
+    function showOtpMsg(msg, isSuccess) {
+      if (!otpMsg) return;
+      otpMsg.textContent = msg;
+      otpMsg.style.display = 'block';
+      otpMsg.style.color = isSuccess ? '#1a7a52' : '#c0404a';
+    }
+
     // Tab Switcher
     if (tabLogin && tabRegister) {
       tabLogin.onclick = () => {
@@ -1448,6 +1608,7 @@
         tabRegister.classList.remove('active');
         authSubmitBtn.textContent = 'Sign In';
         authMsg.style.display = 'none';
+        if (captchaWrap) captchaWrap.style.display = 'none';
       };
       tabRegister.onclick = () => {
         currentAuthMode = 'register';
@@ -1455,6 +1616,8 @@
         tabLogin.classList.remove('active');
         authSubmitBtn.textContent = 'Create Account';
         authMsg.style.display = 'none';
+        refreshCaptcha();
+        if (captchaWrap) captchaWrap.style.display = 'block';
       };
     }
 
@@ -1466,8 +1629,25 @@
           showAuthMsg('Supabase is still connecting. Please try again in a moment.', false);
           return;
         }
+
+        // Honeypot check
+        if (authHp && authHp.value) {
+          return; // silent drop for bots
+        }
+
         const email = authEmail.value.trim();
         const password = authPassword.value;
+
+        // Anti-spam captcha check for register
+        if (currentAuthMode === 'register') {
+          const userAns = Number(captchaInput?.value || 0);
+          if (userAns !== captchaExpected) {
+            showAuthMsg('⚠️ Incorrect anti-spam answer. Please try again.', false);
+            refreshCaptcha();
+            return;
+          }
+        }
+
         authSubmitBtn.disabled = true;
         authSubmitBtn.textContent = 'Please wait…';
         authMsg.style.display = 'none';
@@ -1475,17 +1655,32 @@
         try {
           if (currentAuthMode === 'login') {
             const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
-            if (error) throw error;
+            if (error) {
+              if (error.message.toLowerCase().includes('not confirmed') || error.message.toLowerCase().includes('unconfirmed')) {
+                showOtpView(email);
+                showOtpMsg('Please enter the code sent to your email to verify.', false);
+                return;
+              }
+              throw error;
+            }
             showAuthMsg('Signed in successfully!', true);
             setTimeout(() => { authModal.style.display = 'none'; }, 800);
           } else {
             const { data, error } = await sbClient.auth.signUp({ email, password });
             if (error) throw error;
-            showAuthMsg('Account created! ' + (data?.session ? 'You are now signed in.' : 'Check your email to confirm.'), true);
-            setTimeout(() => { authModal.style.display = 'none'; }, 1500);
+
+            if (data?.session) {
+              showAuthMsg('Account created & signed in! 🎉', true);
+              setTimeout(() => { authModal.style.display = 'none'; }, 1000);
+            } else {
+              // Email confirmation required -> switch to OTP verification view!
+              showOtpView(email);
+              showOtpMsg('Verification code sent! Check your email inbox.', true);
+            }
           }
         } catch (err) {
           showAuthMsg(err.message || 'Authentication failed.', false);
+          if (currentAuthMode === 'register') refreshCaptcha();
         } finally {
           authSubmitBtn.disabled = false;
           authSubmitBtn.textContent = currentAuthMode === 'login' ? 'Sign In' : 'Create Account';
