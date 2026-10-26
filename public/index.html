@@ -1011,19 +1011,6 @@
         <a href="https://ko-fi.com/marry2" target="_blank" rel="noopener" style="display:block; width:100%; padding:13px; font-size:1rem; font-weight:800; border-radius:12px; background:linear-gradient(90deg, #FFDD00, #FFC200); color:#1a1200; text-decoration:none; box-shadow:0 4px 18px rgba(255,200,0,0.35);">
           ☕ Subscribe on Ko-fi
         </a>
-        <p style="font-size:0.75rem; color:#8d96b0; margin-top:6px;">Supporters get an instant membership code via Ko-fi.</p>
-      </div>
-
-      <!-- Redeem Code Section -->
-      <div style="margin-top: 18px; padding-top: 16px; border-top: 1px dashed rgba(140,150,190,0.35); text-align: left;">
-        <label style="font-size:0.8rem; font-weight:700; color:#5a607a;">Have a Membership or Ko-fi Code?</label>
-        <div style="display:flex; gap:8px; margin-top:6px;">
-          <input type="text" id="activate-code-input" placeholder="e.g. MARRYVIP" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(140,150,190,0.4); text-transform:uppercase;">
-          <button id="activate-code-btn" style="width:auto; margin:0; padding:10px 18px; border-radius:10px; font-weight:700; background:#3a5ab0; color:#fff; border:none; cursor:pointer;">
-            Redeem
-          </button>
-        </div>
-        <div id="activate-msg" style="margin-top:8px; font-size:0.82rem; display:none;"></div>
       </div>
     </div>
   </div>
@@ -1772,49 +1759,6 @@
       authMsg.textContent = msg;
       authMsg.style.display = 'block';
       authMsg.style.color = isSuccess ? '#1a7a52' : '#c0404a';
-    }
-
-    // Membership Code Activation
-    const activateBtn = document.getElementById('activate-code-btn');
-    const activateInput = document.getElementById('activate-code-input');
-    const activateMsg = document.getElementById('activate-msg');
-
-    if (activateBtn && activateInput) {
-      activateBtn.onclick = async () => {
-        const code = activateInput.value.trim();
-        if (!code) return;
-        activateBtn.disabled = true;
-        activateBtn.textContent = '…';
-        activateMsg.style.display = 'none';
-
-        try {
-          const token = await getAuthToken();
-          const headers = { 'Content-Type': 'application/json' };
-          if (token) headers['Authorization'] = 'Bearer ' + token;
-          const did = getDeviceId();
-          headers['x-device-id'] = did;
-
-          const res = await fetch('/api/activate', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ code })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Failed to activate code.');
-
-          activateMsg.textContent = data.message || '🎉 Pro Membership activated!';
-          activateMsg.style.color = '#1a7a52';
-          activateMsg.style.display = 'block';
-          updateUserNav();
-        } catch (e) {
-          activateMsg.textContent = '⚠️ ' + e.message;
-          activateMsg.style.color = '#c0404a';
-          activateMsg.style.display = 'block';
-        } finally {
-          activateBtn.disabled = false;
-          activateBtn.textContent = 'Redeem';
-        }
-      };
     }
   </script>
 </body>

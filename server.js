@@ -18,8 +18,7 @@ import {
   incrementGuestUsage,
   recordVisitorCountry,
   getVisitorStatsFromDb,
-  getUserFromToken,
-  activateMembership
+  getUserFromToken
 } from './supabase.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -377,21 +376,6 @@ app.get('/api/me', async (req, res) => {
     limit: status.limit,
     allowed: status.allowed
   });
-});
-
-// Activate membership using a promo/order code
-app.post('/api/activate', async (req, res) => {
-  const id = clientId(req);
-  const user = await reqUser(req);
-  const code = (req.body?.code || '').trim();
-  if (!code) return res.status(400).json({ error: 'Please enter your membership code.' });
-
-  try {
-    const resActivate = await activateMembership(id, user?.id, code);
-    res.json(resActivate);
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
 });
 
 // Keep API errors JSON-shaped and avoid exposing Express/body-parser stack traces.

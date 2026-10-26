@@ -123,56 +123,6 @@ export async function incrementGuestUsage(identifier, userId = null) {
 }
 
 /**
- * Activate membership for a user or identifier using an activation code.
- */
-export async function activateMembership(identifier, userId = null, code = '') {
-  const cleanCode = String(code || '').trim().toUpperCase();
-  const validCodes = (process.env.MEMBERSHIP_PROMO_CODE || 'MARRYVIP,PRO2026,KOFI2026')
-    .split(',')
-    .map(c => c.trim().toUpperCase());
-
-  const targetId = userId ? `user_${userId}` : identifier;
-  if (!targetId) throw new Error('No client or user session provided.');
-
-  if (!cleanCode || !validCodes.includes(cleanCode)) {
-    throw new Error('Invalid or expired membership code.');
-  }
-
-  if (supabase) {
-    try {
-      const { data } = await supabase
-        .from('guest_limits')
-        .select('analyze_count')
-        .eq('identifier', targetId)
-        .maybeSingle();
-
-      await supabase.from('guest_limits').upsert({
-        identifier: targetId,
-        analyze_count: data?.analyze_count || 0,
-        is_member: true,
-        last_used: new Date().toISOString()
-      });
-
-      if (identifier && identifier !== targetId) {
-        await supabase.from('guest_limits').upsert({
-          identifier,
-          is_member: true,
-          last_used: new Date().toISOString()
-        });
-      }
-      return { success: true, message: '🎉 Membership activated! You now have unlimited access & roadmaps.' };
-    } catch (e) {
-      console.warn('Supabase activateMembership error:', e.message);
-    }
-  }
-
-  const rec = memLimits.get(targetId) || { count: 0, isMember: true };
-  rec.isMember = true;
-  memLimits.set(targetId, rec);
-  return { success: true, message: '🎉 Membership activated! You now have unlimited access & roadmaps.' };
-}
-
-/**
  * Record a visitor's country into Supabase.
  */
 export async function recordVisitorCountry({ country, code, flag }) {
