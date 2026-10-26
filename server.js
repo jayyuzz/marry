@@ -18,7 +18,8 @@ import {
   incrementGuestUsage,
   recordVisitorCountry,
   getVisitorStatsFromDb,
-  getUserFromToken
+  getUserFromToken,
+  setMemberByEmail
 } from './supabase.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -101,6 +102,7 @@ function saveVisitors(data) {
 }
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Track visitor on every page load (non-blocking, runs before static)
 app.use((req, res, next) => {
@@ -376,6 +378,46 @@ app.get('/api/me', async (req, res) => {
     limit: status.limit,
     allowed: status.allowed
   });
+});
+
+// Ko-fi Webhook for automatic membership activation
+app.post('/api/kofi-webhook', async (req, res) => {
+  try {
+    let payload = null;
+
+    // Ko-fi sends form-encoded with 'data' field containing JSON string
+    if (req.body?.data) {
+      payload = typeof req.body.data === 'string' ? JSON.parse(req.body.data) : req.body.data;
+    } else if (req.body?.email) {
+      payload = req.body;
+    }
+
+    if (!payload) {
+      return res.status(400).send('No payload data found');
+    }
+
+    // Verify token if configured
+    const expectedToken = process.env.KOFI_VERIFICATION_TOKEN;
+    if (expectedToken && payload.verification_token !== expectedToken) {
+      console.warn('Ko-fi webhook token mismatch');
+      return res.status(401).send('Unauthorized token');
+    }
+
+    const payerEmail = (payload.email || payload.from_name || '').trim();
+    const isSubscription = payload.type === 'Subscription' || payload.is_subscription_payment || payload.is_first_subscription_payment || payload.tier_name;
+
+    console.log(`[Ko-fi Webhook] Received ${payload.type} from: ${payerEmail}, tier: ${payload.tier_name || 'N/A'}`);
+
+    if (payerEmail && (isSubscription || payload.type === 'Donation')) {
+      await setMemberByEmail(payerEmail);
+      console.log(`[Ko-fi Webhook] Successfully activated PRO membership for ${payerEmail}`);
+    }
+
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('Error handling Ko-fi webhook:', err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // Keep API errors JSON-shaped and avoid exposing Express/body-parser stack traces.

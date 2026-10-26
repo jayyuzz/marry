@@ -51,6 +51,30 @@ export async function checkGuestLimit(identifier, userId = null) {
           .eq('identifier', `user_${userId}`)
           .maybeSingle();
         record = data;
+
+        // Also check if user email was marked by Ko-fi webhook
+        if (!record?.is_member) {
+          try {
+            const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+            if (user?.email) {
+              const { data: emailRec } = await supabase
+                .from('guest_limits')
+                .select('*')
+                .eq('identifier', `email_${user.email.toLowerCase()}`)
+                .maybeSingle();
+              if (emailRec?.is_member) {
+                record = emailRec;
+                // Sync user id record
+                await supabase.from('guest_limits').upsert({
+                  identifier: `user_${userId}`,
+                  analyze_count: record.analyze_count || 0,
+                  is_member: true,
+                  last_used: new Date().toISOString()
+                });
+              }
+            }
+          } catch {}
+        }
       }
 
       // Check device/IP identifier
@@ -120,6 +144,52 @@ export async function incrementGuestUsage(identifier, userId = null) {
   const rec = memLimits.get(targetId) || { count: 0, isMember: false };
   rec.count += 1;
   memLimits.set(targetId, rec);
+}
+
+/**
+ * Activate membership automatically by user email (called by Ko-fi Webhook).
+ */
+export async function setMemberByEmail(email) {
+  if (!email) return false;
+  const cleanEmail = email.trim().toLowerCase();
+
+  if (supabase) {
+    try {
+      // Find user id by email via admin auth API
+      const { data: { users } } = await supabase.auth.admin.listUsers();
+      const matched = users?.find(u => u.email?.toLowerCase() === cleanEmail);
+
+      const targetIdentifier = matched ? `user_${matched.id}` : `email_${cleanEmail}`;
+
+      const { data } = await supabase
+        .from('guest_limits')
+        .select('analyze_count')
+        .eq('identifier', targetIdentifier)
+        .maybeSingle();
+
+      await supabase.from('guest_limits').upsert({
+        identifier: targetIdentifier,
+        analyze_count: data?.analyze_count || 0,
+        is_member: true,
+        last_used: new Date().toISOString()
+      });
+
+      // Also upsert email key if user was matched by id
+      if (matched) {
+        await supabase.from('guest_limits').upsert({
+          identifier: `email_${cleanEmail}`,
+          is_member: true,
+          last_used: new Date().toISOString()
+        });
+      }
+      return true;
+    } catch (e) {
+      console.warn('Supabase setMemberByEmail error:', e.message);
+    }
+  }
+
+  memLimits.set(`email_${cleanEmail}`, { count: 0, isMember: true });
+  return true;
 }
 
 /**
