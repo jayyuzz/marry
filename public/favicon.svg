@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- Globe gradient matching logo-eye -->
+    <linearGradient id="favGlobe" x1="0.2" y1="0.1" x2="0.85" y2="0.9">
+      <stop offset="0%" stop-color="#d8e9a9"/>
+      <stop offset="50%" stop-color="#8bb973"/>
+      <stop offset="100%" stop-color="#467855"/>
+    </linearGradient>
+    <!-- Leaf gradient -->
+    <linearGradient id="favLeaf" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#356847"/>
+      <stop offset="100%" stop-color="#8eb86f"/>
+    </linearGradient>
+    <!-- Orbit gradient -->
+    <linearGradient id="favOrbit" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e88968"/>
+      <stop offset="100%" stop-color="#c85f40"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Back half of orbit -->
+  <path d="M 12 43 C 6 36, 10 24, 25 18 C 34 14, 46 15, 53 19" 
+        fill="none" stroke="url(#favOrbit)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 6" opacity="0.85"/>
+
+  <!-- Globe Body -->
+  <circle cx="31" cy="35" r="21" fill="url(#favGlobe)" stroke="#222b1f" stroke-width="3.5"/>
+
+  <!-- Globe inner land / shading contours -->
+  <path d="M 17 28 C 22 22, 34 20, 44 24 C 41 27, 36 28, 32 30 C 26 33, 22 36, 17 38 Z" fill="#ebf4be" opacity="0.6"/>
+  <path d="M 18 42 C 24 38, 30 39, 36 43 C 41 46, 45 42, 50 42 C 45 51, 34 56, 26 55 C 22 53, 19 48, 18 42 Z" fill="#4d7c57" opacity="0.8"/>
+  <path d="M 14 36 Q 31 43 48 36" fill="none" stroke="#d5e6aa" stroke-width="2" opacity="0.6"/>
+  <path d="M 24 16 Q 30 35 34 56" fill="none" stroke="#d5e6aa" stroke-width="1.8" opacity="0.5"/>
+
+  <!-- Front half of orbit -->
+  <path d="M 9 37 C 12 47, 24 53, 37 51 C 47 49, 56 42, 57 33 C 58 27, 56 22, 52 19" 
+        fill="none" stroke="url(#favOrbit)" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- Satellite dot on orbit -->
+  <circle cx="53" cy="23" r="4.5" fill="#f1c978" stroke="#222b1f" stroke-width="2.5"/>
+
+  <!-- Sprout / Leaf at top -->
+  <path d="M 27 20 C 26 10, 32 4, 42 2 C 43 13, 37 19, 27 20 Z" 
+        fill="url(#favLeaf)" stroke="#222b1f" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 28 19 Q 34 11 39 5" fill="none" stroke="#eef7d0" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Bright Golden Sparkle (Top Right) -->
+  <path d="M 50 2 L 53 10 L 61 13 L 53 16 L 50 24 L 47 16 L 39 13 L 47 10 Z" 
+        fill="#f6ca55" stroke="#222b1f" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="50" cy="13" r="2" fill="#fffef2"/>
+
+  <!-- Small accent star (Bottom Left) -->
+  <path d="M 8 16 L 10 20 L 14 21 L 10 23 L 8 27 L 7 23 L 3 21 L 7 20 Z" 
+        fill="#e57b5c" stroke="#222b1f" stroke-width="1.8" stroke-linejoin="round"/>
+</svg>
