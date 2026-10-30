@@ -1,31 +1,39 @@
 # marry 💍
 
-Analisis prospek pasar internasional untuk produk digital kecil (ebook, aplikasi, template, course, preset, dll).
+**Live:** https://marry.myap.web.id
 
-## Cara jalan
+Market-prospect analyzer for small digital products (ebooks, apps, templates, courses, presets). Describe a product, pick a target country, and get a structured analysis plus an execution roadmap, in 50+ languages.
+*Analisis prospek pasar internasional untuk produk digital kecil.*
 
+## Features
+- `/api/analyze`: AI-generated market analysis (demand, competition, pricing, score)
+- `/api/roadmap`: step-by-step execution roadmap for the product
+- 140+ built-in trending product ideas as one-click starting points
+- Membership / Supabase auth and Ko-fi webhook for supporter tiers
+- Rate-limited AI endpoints, visitor statistics by country
+
+## Stack
+Node.js · Express · Supabase · OpenAI-compatible AI gateway · Vercel (serverless)
+
+## Run locally
 ```bash
-cd E:\VIbe\Projects\marry
-copy .env.example .env   # lalu isi AI_API_KEY dari dashboard 9router
+cp .env.example .env     # set AI_API_KEY, AI_BASE_URL, Supabase keys
 npm install
-npm start
-# buka http://localhost:3000
-# jalankan test parser/normalisasi
-npm test
+npm start                # http://localhost:3000
+npm test                 # parser / schema-normalisation tests
 ```
 
-## Alur API
+## API
+- `POST /api/analyze` `{ "produk": "..." }` returns the analysis as JSON
+- `POST /api/roadmap` `{ "produk": "..." }` returns the roadmap as JSON
+- `GET /api/health` returns status (`aiConfigured` true/false)
+- `GET /api/visitors` returns visitor and top-country stats
 
-- `POST /api/analyze` body `{ "produk": "..." }` → hasil analisis JSON
-- `POST /api/roadmap` body `{ "produk": "..." }` → roadmap eksekusi JSON
-- `GET /api/health` → cek status (aiConfigured true/false)
-- `GET /api/visitors` → statistik visitor dan negara teratas
+## Structure
+- `server.js`: Express backend and AI gateway calls
+- `ai-utils.js`: AI response parsing, schema normalisation, score helpers
+- `supabase.js`: Supabase client
+- `public/index.html`: single-page UI
+- `test/`: unit tests
 
-## Struktur
-
-- `server.js` — backend Express + panggilan ke gateway AI
-- `ai-utils.js` — parser response AI, normalisasi schema, dan helper skor
-- `public/index.html` — UI satu halaman
-- `.env` — konfigurasi (copy dari `.env.example`, jangan di-commit)
-
-Catatan: `TRUST_PROXY` harus tetap `false` kecuali aplikasi berada di belakang reverse proxy yang benar-benar dipercaya. Endpoint AI memiliki batas request sederhana untuk mencegah penyalahgunaan.
+> `TRUST_PROXY` must stay `false` unless the app sits behind a reverse proxy you trust.
