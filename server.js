@@ -145,6 +145,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // GET /api/visitors — return visitor stats & active online
 app.get('/api/visitors', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   const ip = clientIp(req);
   activeVisitors.set(ip, Date.now());
 
