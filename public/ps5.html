@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>marry — PS5 Gaming Console Edition | Market Intelligence</title>
+  
+  <meta name="description" content="Analyze overseas market prospects for small digital products with a sleek PS5 console dashboard interface.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./ps5-hub.css?v=15">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --ps-cyan: #38bdf8;
+      --ps-purple: #a855f7;
+      --ps-emerald: #10b981;
+      --ps-amber: #f59e0b;
+      --ps-rose: #f43f5e;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    body {
+      background: #000000;
+      color: #ffffff;
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Backdrop ambient gradients */
+    .ps5-backdrop-container {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 75% 20%, rgba(168, 85, 247, 0.22) 0%, rgba(10, 5, 20, 0.95) 70%),
+                  linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%);
+      transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ps5-app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: space-between;
+    }
+
+    /* Tiles custom */
+    .ps5-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      cursor: pointer;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      width: 104px;
+      height: 104px;
+      flex-shrink: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ps5-tile:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-4px) scale(1.04);
+    }
+    .ps5-tile.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #ffffff;
+      box-shadow: 0 0 24px rgba(255, 255, 255, 0.35), 0 8px 18px rgba(0, 0, 0, 0.6);
+      transform: translateY(-6px) scale(1.08);
+    }
+    .ps5-tile-icon {
+      font-size: 2rem;
+      pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.34, 1.25, 0.64, 1);
+    }
+    .ps5-tile.active .ps5-tile-icon {
+      transform: scale(1.18);
+    }
+    .ps5-tile-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      pointer-events: none;
+    }
+    .ps5-tile.active .ps5-tile-label {
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Form Dock & Controls */
+    .ps5-console-dock {
+      background: rgba(18, 18, 24, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 20px 24px;
+      margin-top: 18px;
+      max-width: 680px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    }
+
+    .ps5-input-group {
+      margin-bottom: 14px;
+    }
+    .ps5-input-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .ps5-textarea, .ps5-input, .ps5-select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #ffffff;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .ps5-textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+    .ps5-textarea:focus, .ps5-input:focus, .ps5-select:focus {
+      border-color: #ffffff;
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .ps5-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 580px) {
+      .ps5-form-row { grid-template-columns: 1fr; }
+    }
+
+    /* PS5 Controller buttons */
+    .ps5-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #ffffff;
+      color: #000000;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 12px 28px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+    .ps5-btn-primary:hover {
+      background: #e4e4e7;
+      transform: scale(1.03);
+      box-shadow: 0 0 28px rgba(255, 255, 255, 0.5);
+    }
+    .ps5-btn-primary:active {
+      transform: scale(0.98);
+    }
+    .ps5-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 12px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+      text-decoration: none;
+    }
+    .ps5-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Result Modal / Screen */
+    .ps5-result-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 5, 12, 0.92);
+      backdrop-filter: blur(24px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .ps5-result-card {
+      background: rgba(18, 20, 28, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 24px;
+      max-width: 720px;
+      width: 100%;
+      padding: 32px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8), 0 0 40px rgba(168, 85, 247, 0.2);
+      position: relative;
+      animation: ps5Pop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes ps5Pop {
+      from { transform: scale(0.94) translateY(14px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .trophy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .trophy-platinum {
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.25));
+      border: 1px solid var(--ps-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+    }
+    .trophy-gold {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--ps-amber);
+      color: #fef08a;
+    }
+    .trophy-ruby {
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid var(--ps-rose);
+      color: #fecdd3;
+    }
+
+    .ps5-score-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: conic-gradient(var(--ps-cyan) var(--p, 80%), rgba(255, 255, 255, 0.1) 0);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+    }
+    .ps5-score-circle span {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: #0f1118;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .ps5-meter-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 99px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .ps5-meter-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+    .ps5-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    @media (max-width: 580px) {
+      .ps5-grid-2 { grid-template-columns: 1fr; }
+    }
+    .ps5-panel {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .ps5-panel h4 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #a1a1aa;
+      margin-bottom: 8px;
+    }
+    .ps5-panel ul { list-style: none; }
+    .ps5-panel li {
+      padding: 3px 0 3px 14px;
+      position: relative;
+      font-size: 0.88rem;
+      color: #e4e4e7;
+    }
+    .ps5-panel li::before {
+      content: '■';
+      position: absolute;
+      left: 0;
+      color: var(--ps-cyan);
+      font-size: 0.65rem;
+      top: 4px;
+    }
+
+    .ps5-timeline-node {
+      border-left: 2px solid var(--ps-cyan);
+      padding: 4px 0 16px 18px;
+      margin-left: 6px;
+      position: relative;
+    }
+    .ps5-timeline-node::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ps-cyan);
+      box-shadow: 0 0 10px var(--ps-cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Backdrop Container -->
+  <div class="ps5-backdrop-container" id="ps5-bg"></div>
+
+  <div class="ps5-app">
+    <!-- 1. Top System Bar -->
+    <header class="ps5-topbar">
+      <nav class="ps5-hub-tabs" aria-label="Main Navigation">
+        <button class="ps5-hub-tab active" id="tab-lab" type="button">💍 Marry Console</button>
+        <button class="ps5-hub-tab" id="tab-membership" type="button">👑 Pro Membership</button>
+        <a href="/" class="ps5-hub-tab" style="text-decoration:none;">⚡ Stripe Edition</a>
+      </nav>
+
+      <div class="ps5-system-bar">
+        <div class="ps5-clock" id="ps5-clock">12:00 PM</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <a href="https://ko-fi.com/marry2" target="_blank" rel="noopener" class="ps5-btn-secondary" style="padding:5px 12px; font-size:0.75rem;">
+            ☕ Ko-fi
+          </a>
+          <button id="ps5-auth-btn" class="ps5-btn-secondary" style="padding:5px 12px; font-size:0.75rem;">
+            🔑 Sign In
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. Horizontal Tile Carousel Shelf -->
+    <section class="ps5-center-section" style="padding: 10px 48px;">
+      <div style="font-size:0.8rem; font-weight:700; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">
+        🎮 Featured Opportunity Sparks
+      </div>
+      <div class="ps5-ribbon-wrapper" id="ribbon-wrapper" style="overflow-x:auto; display:flex; gap:14px; padding-bottom:8px;">
+        
+        <div class="ps5-tile active" data-index="0" data-idea="Ebook 30 Indonesian home cooking recipes (English)" data-cat="📘 Culinary Ebook" data-country="United States" data-theme="purple">
+          <div class="ps5-tile-icon">🥘</div>
+          <div class="ps5-tile-label">Indonesian Food</div>
+        </div>
+
+        <div class="ps5-tile" data-index="1" data-idea="Notion Freelance OS: Invoicing, CRM & Project Pipeline" data-cat="📊 Notion System" data-country="United Kingdom" data-theme="blue">
+          <div class="ps5-tile-icon">📑</div>
+          <div class="ps5-tile-label">Notion Freelance</div>
+        </div>
+
+        <div class="ps5-tile" data-index="2" data-idea="Minimalist Habit Tracker App for University Students" data-cat="📱 Mobile App" data-country="Japan" data-theme="emerald">
+          <div class="ps5-tile-icon">⏱️</div>
+          <div class="ps5-tile-label">Habit Tracker</div>
+        </div>
+
+        <div class="ps5-tile" data-index="3" data-idea="Moody Film Lightroom Presets for Travel Creators" data-cat="📸 Digital Assets" data-country="Germany" data-theme="amber">
+          <div class="ps5-tile-icon">📷</div>
+          <div class="ps5-tile-label">Lightroom Presets</div>
+        </div>
+
+        <div class="ps5-tile" data-index="4" data-idea="100+ High-Converting SaaS Cold Email Templates" data-cat="✉️ Copywriting Kit" data-country="Australia" data-theme="cyan">
+          <div class="ps5-tile-icon">📨</div>
+          <div class="ps5-tile-label">Cold Email Kit</div>
+        </div>
+
+        <div class="ps5-tile" data-index="5" data-idea="" data-cat="✨ Custom Spark" data-country="" data-theme="violet">
+          <div class="ps5-tile-icon">✍️</div>
+          <div class="ps5-tile-label">+ Custom Idea</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. Details & Command Center -->
+    <section class="ps5-details-section" style="padding: 0 48px 24px;">
+      <div class="ps5-game-info">
+        <div class="ps5-edition-badge" style="margin-bottom:8px;">
+          <span class="ps-badge-pill" id="hero-badge" style="background:rgba(168,85,247,0.25); color:#d8b4fe; border:1px solid rgba(168,85,247,0.4); padding:3px 10px; border-radius:99px; font-size:0.75rem; font-weight:700;">📘 CULINARY EBOOK</span>
+          <span class="ps-badge-meta" style="color:#a1a1aa; font-size:0.8rem; margin-left:8px;">GLOBAL MARKET PROSPECT LAB · v2.0</span>
+        </div>
+
+        <h1 id="hero-title" style="font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; margin: 4px 0 8px;">
+          Indonesian Home Recipes Ebook
+        </h1>
+        <p id="hero-desc" style="color: #a1a1aa; font-size: 0.95rem; max-width: 580px; line-height: 1.5;">
+          Analyze overseas buyer appetite, optimal USD pricing tiers, and step-by-step roadmap for your digital product.
+        </p>
+
+        <!-- Command Dock Form -->
+        <div class="ps5-console-dock">
+          <form id="ps5-analyze-form">
+            <div class="ps5-input-group">
+              <label for="ps5-product">🎮 Product Concept Idea</label>
+              <textarea id="ps5-product" class="ps5-textarea" placeholder="Describe your digital product (ebook, SaaS, Notion template, course, presets)..." required>Ebook 30 Indonesian home cooking recipes (English)</textarea>
+            </div>
+
+            <div class="ps5-form-row">
+              <div class="ps5-input-group">
+                <label for="ps5-country">🌍 Target Market (Optional)</label>
+                <input type="text" id="ps5-country" class="ps5-input" placeholder="e.g. United States, Japan, Germany..." value="United States">
+              </div>
+
+              <div class="ps5-input-group">
+                <label for="ps5-lang">🌐 Analysis Language</label>
+                <select id="ps5-lang" class="ps5-select">
+                  <option value="en">English (US/UK/Intl)</option>
+                  <option value="id">Bahasa Indonesia</option>
+                  <option value="ja">日本語 (Japanese)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px; margin-top:14px; flex-wrap:wrap;">
+              <button type="submit" id="ps5-submit-btn" class="ps5-btn-primary">
+                ▶ Launch Analysis
+              </button>
+              <button type="button" id="ps5-random-btn" class="ps5-btn-secondary">
+                🎲 Next Spark
+              </button>
+              <span id="ps5-status" style="font-size:0.85rem; color:#a1a1aa; display:none;">
+                ⚡ Processing via AI Tunnel...
+              </span>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. Controller Footer Dock -->
+    <footer class="ps5-bottom-bar" style="padding: 12px 48px; background:rgba(0,0,0,0.85); border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+      <div class="ps5-controls-legend" style="display:flex; gap:18px; font-size:0.75rem; color:#a1a1aa;">
+        <span><kbd style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px; color:#fff;">← / →</kbd> Browse Ideas</span>
+        <span><kbd style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px; color:#fff;">Enter</kbd> Launch</span>
+        <span><kbd style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px; color:#fff;">Esc</kbd> Dismiss</span>
+      </div>
+      <div style="font-size:0.75rem; color:#71717a;">
+        marry PS5 edition · antislop verified
+      </div>
+    </footer>
+  </div>
+
+  <!-- 5. PS5 Analysis Result Modal / Trophy Screen -->
+  <div id="ps5-result-modal" class="ps5-result-modal">
+    <div class="ps5-result-card">
+      <button id="ps5-close-modal" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#a1a1aa; font-size:1.4rem; cursor:pointer;">✕</button>
+
+      <div id="ps5-trophy-badge" class="trophy-badge trophy-platinum">
+        🏆 PLATINUM VERDICT: HIGH VIABILITY
+      </div>
+
+      <h2 id="res-score-title" style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px;">
+        Market Prospect Score: 86 / 100
+      </h2>
+      <p id="res-summary" style="color: #a1a1aa; font-size: 0.95rem; line-height: 1.5; margin-bottom: 18px;">
+        Strong overseas demand for Indonesian culinary content, especially authentic sambal and street food recipes tailored for Western kitchens.
+      </p>
+
+      <!-- Score Ring & Metric Bars -->
+      <div style="display:flex; align-items:center; gap:20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px 22px;">
+        <div id="res-score-ring" class="ps5-score-circle" style="--p:86%;">
+          <span id="res-score-num">86</span>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:4px;">
+            <span>🔎 OVERSEAS DEMAND</span>
+            <span id="res-demand-val" style="color:var(--ps-cyan);">82 / 100</span>
+          </div>
+          <div class="ps5-meter-track" style="margin-bottom:12px;">
+            <div id="res-demand-bar" class="ps5-meter-fill" style="width:82%; background:var(--ps-cyan); box-shadow:0 0 10px var(--ps-cyan);"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:4px;">
+            <span>🥊 COMPETITION LEVEL</span>
+            <span id="res-comp-val" style="color:var(--ps-rose);">44 / 100</span>
+          </div>
+          <div class="ps5-meter-track">
+            <div id="res-comp-bar" class="ps5-meter-fill" style="width:44%; background:var(--ps-rose); box-shadow:0 0 10px var(--ps-rose);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-Column Info Grid -->
+      <div class="ps5-grid-2">
+        <div class="ps5-panel">
+          <h4>🌍 Top Geographical Markets</h4>
+          <ul id="res-markets">
+            <li>United States</li>
+            <li>Australia</li>
+            <li>United Kingdom</li>
+            <li>Netherlands</li>
+          </ul>
+        </div>
+
+        <div class="ps5-panel">
+          <h4>🏪 Selling Platforms</h4>
+          <ul id="res-platforms">
+            <li>Gumroad</li>
+            <li>Amazon KDP</li>
+            <li>Etsy Digital Downloads</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Optimal Price Box -->
+      <div class="ps5-panel" style="margin-top:14px;">
+        <h4>💰 Optimal Pricing & Potential</h4>
+        <div id="res-price-line" style="font-size:1.1rem; font-weight:800; color:#ffffff; font-family:var(--font-mono);">
+          $12 – $24 USD <span style="font-size:0.85rem; font-weight:500; color:#a1a1aa;">· Digital Bundle</span>
+        </div>
+        <p id="res-price-note" style="font-size:0.8rem; color:#71717a; margin-top:4px;">
+          Estimated income: $400 - $1,800 / month with Pinterest & TikTok organic traffic.
+        </p>
+      </div>
+
+      <!-- Full Roadmap Toggle Button -->
+      <div style="margin-top:20px; display:flex; gap:12px;">
+        <button id="ps5-view-roadmap-btn" class="ps5-btn-primary" style="flex:1;">
+          🗺️ View Execution Roadmap
+        </button>
+        <button id="ps5-done-btn" class="ps5-btn-secondary">
+          Done
+        </button>
+      </div>
+
+      <!-- Roadmap Timeline Container -->
+      <div id="ps5-roadmap-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:18px;">
+        <h3 style="font-size:1.15rem; font-weight:800; color:#fff; margin-bottom:12px;">🧭 4-Phase Execution Roadmap</h3>
+        <div id="ps5-phases-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Live PS5 Clock
+    function updateClock() {
+      const now = new Date();
+      const el = document.getElementById('ps5-clock');
+      if (el) {
+        el.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Tile Switching Logic
+    const tiles = document.querySelectorAll('.ps5-tile');
+    const heroTitle = document.getElementById('hero-title');
+    const heroBadge = document.getElementById('hero-badge');
+    const inputProduct = document.getElementById('ps5-product');
+    const inputCountry = document.getElementById('ps5-country');
+    const ps5Bg = document.getElementById('ps5-bg');
+
+    const THEME_GRADIENTS = {
+      purple: 'radial-gradient(circle at 75% 20%, rgba(168, 85, 247, 0.25) 0%, rgba(10, 5, 20, 0.95) 70%), linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%)',
+      blue: 'radial-gradient(circle at 75% 20%, rgba(59, 130, 246, 0.25) 0%, rgba(4, 10, 24, 0.95) 70%), linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%)',
+      emerald: 'radial-gradient(circle at 75% 20%, rgba(16, 185, 129, 0.25) 0%, rgba(3, 14, 10, 0.95) 70%), linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%)',
+      amber: 'radial-gradient(circle at 75% 20%, rgba(245, 158, 11, 0.25) 0%, rgba(18, 10, 3, 0.95) 70%), linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%)',
+      cyan: 'radial-gradient(circle at 75% 20%, rgba(6, 182, 212, 0.25) 0%, rgba(3, 12, 18, 0.95) 70%), linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%)',
+      violet: 'radial-gradient(circle at 75% 20%, rgba(139, 92, 246, 0.25) 0%, rgba(8, 4, 16, 0.95) 70%), linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, #050508 100%)'
+    };
+
+    function selectTile(tile) {
+      tiles.forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+      const label = tile.querySelector('.ps5-tile-label').textContent;
+      const idea = tile.dataset.idea || '';
+      const cat = tile.dataset.cat || '✨ Digital Asset';
+      const country = tile.dataset.country || '';
+      const theme = tile.dataset.theme || 'purple';
+
+      heroTitle.textContent = label;
+      heroBadge.textContent = cat;
+      if (idea) inputProduct.value = idea;
+      if (country) inputCountry.value = country;
+
+      if (ps5Bg && THEME_GRADIENTS[theme]) {
+        ps5Bg.style.background = THEME_GRADIENTS[theme];
+      }
+    }
+
+    tiles.forEach(tile => {
+      tile.addEventListener('click', () => selectTile(tile));
+    });
+
+    // Keyboard navigation (Left / Right / Enter)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+      let activeIndex = -1;
+      tiles.forEach((t, i) => { if (t.classList.contains('active')) activeIndex = i; });
+
+      if (e.key === 'ArrowRight') {
+        const next = (activeIndex + 1) % tiles.length;
+        selectTile(tiles[next]);
+      } else if (e.key === 'ArrowLeft') {
+        const prev = (activeIndex - 1 + tiles.length) % tiles.length;
+        selectTile(tiles[prev]);
+      } else if (e.key === 'Escape') {
+        document.getElementById('ps5-result-modal').style.display = 'none';
+      }
+    });
+
+    // Random Spark Button
+    document.getElementById('ps5-random-btn').addEventListener('click', () => {
+      let activeIndex = -1;
+      tiles.forEach((t, i) => { if (t.classList.contains('active')) activeIndex = i; });
+      let nextIndex;
+      do {
+        nextIndex = Math.floor(Math.random() * (tiles.length - 1));
+      } while (nextIndex === activeIndex);
+      selectTile(tiles[nextIndex]);
+    });
+
+    // Form Submission & API Connection
+    const form = document.getElementById('ps5-analyze-form');
+    const submitBtn = document.getElementById('ps5-submit-btn');
+    const statusMsg = document.getElementById('ps5-status');
+    const resultModal = document.getElementById('ps5-result-modal');
+    const closeModal = document.getElementById('ps5-close-modal');
+    const doneBtn = document.getElementById('ps5-done-btn');
+
+    closeModal.addEventListener('click', () => resultModal.style.display = 'none');
+    doneBtn.addEventListener('click', () => resultModal.style.display = 'none');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const product = inputProduct.value.trim();
+      const country = inputCountry.value.trim();
+      const lang = document.getElementById('ps5-lang').value;
+      if (!product) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Analyzing...';
+      statusMsg.style.display = 'inline';
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            produk: product,
+            negara: country,
+            bahasa: lang,
+            _userPrompt: lang === 'en' ? 'Answer in English' : 'Jawab dalam Bahasa Indonesia'
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'Failed to analyze');
+        }
+
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        alert('⚠️ ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '▶ Launch Analysis';
+        statusMsg.style.display = 'none';
+      }
+    });
+
+    function renderResult(d) {
+      const score = Math.max(0, Math.min(100, Number(d.skor) || 0));
+      const demand = Math.max(0, Math.min(100, Number(d.estimasiPermintaan) || 0));
+      const comp = Math.max(0, Math.min(100, Number(d.tingkatKompetisi) || 0));
+
+      // Trophy Badge
+      const trophyBadge = document.getElementById('ps5-trophy-badge');
+      if (score >= 75) {
+        trophyBadge.className = 'trophy-badge trophy-platinum';
+        trophyBadge.textContent = '🏆 PLATINUM VERDICT: HIGH VIABILITY';
+      } else if (score >= 50) {
+        trophyBadge.className = 'trophy-badge trophy-gold';
+        trophyBadge.textContent = '🥇 GOLD VERDICT: MODERATE VIABILITY';
+      } else {
+        trophyBadge.className = 'trophy-badge trophy-ruby';
+        trophyBadge.textContent = '⚠️ CAUTION: CHALLENGING PROSPECT';
+      }
+
+      document.getElementById('res-score-title').textContent = `Market Prospect Score: ${score} / 100`;
+      document.getElementById('res-summary').textContent = d.ringkasan || '';
+      
+      const scoreCircle = document.getElementById('res-score-ring');
+      scoreCircle.style.setProperty('--p', `${score}%`);
+      document.getElementById('res-score-num').textContent = score;
+
+      document.getElementById('res-demand-val').textContent = `${demand} / 100`;
+      document.getElementById('res-demand-bar').style.width = `${demand}%`;
+
+      document.getElementById('res-comp-val').textContent = `${comp} / 100`;
+      document.getElementById('res-comp-bar').style.width = `${comp}%`;
+
+      const listMarkets = document.getElementById('res-markets');
+      listMarkets.innerHTML = (d.pasarTerbaik || ['Global']).map(m => `<li>${m}</li>`).join('');
+
+      const listPlatforms = document.getElementById('res-platforms');
+      listPlatforms.innerHTML = (d.platform || ['Gumroad', 'Personal Store']).map(p => `<li>${p}</li>`).join('');
+
+      document.getElementById('res-price-line').innerHTML = `
+        ${d.hargaOptimal?.min ?? '10'} – ${d.hargaOptimal?.maks ?? '30'} ${d.hargaOptimal?.mataUang ?? 'USD'}
+        <span style="font-size:0.85rem; font-weight:500; color:#a1a1aa;">· ${d.hargaOptimal?.model || 'Digital Product'}</span>
+      `;
+      document.getElementById('res-price-note').textContent = `Estimated income: ${d.estimasiPendapatan || 'Depends on traffic & conversion'}`;
+
+      // Reset & wire roadmap
+      const roadmapContainer = document.getElementById('ps5-roadmap-container');
+      roadmapContainer.style.display = 'none';
+      const roadmapBtn = document.getElementById('ps5-view-roadmap-btn');
+      roadmapBtn.onclick = () => loadRoadmap(inputProduct.value.trim());
+
+      resultModal.style.display = 'flex';
+    }
+
+    async function loadRoadmap(product) {
+      const roadmapContainer = document.getElementById('ps5-roadmap-container');
+      const phasesList = document.getElementById('ps5-phases-list');
+      phasesList.innerHTML = '<p style="color:#a1a1aa; font-size:0.85rem;">⏳ Drafting structured launch roadmap...</p>';
+      roadmapContainer.style.display = 'block';
+
+      try {
+        const res = await fetch('/api/roadmap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ produk: product })
+        });
+        const data = await res.json();
+        if (data.fase && Array.isArray(data.fase)) {
+          phasesList.innerHTML = data.fase.map((f, i) => `
+            <div class="ps5-timeline-node">
+              <div style="font-weight:800; font-size:0.95rem; color:#fff;">${f.nama || 'Phase ' + (i+1)} <span style="font-size:0.75rem; color:var(--ps-cyan); font-family:var(--font-mono);">· ${f.durasi || ''}</span></div>
+              <p style="font-size:0.85rem; color:#a1a1aa; margin:2px 0 6px;">${f.tujuan || ''}</p>
+              <ul style="list-style:none; padding-left:0; font-size:0.85rem; color:#e4e4e7;">
+                ${(f.kegiatan || []).map(k => '<li style="padding:2px 0;">▸ ' + k + '</li>').join('')}
+              </ul>
+              ${f.keluaran ? `<div style="font-size:0.78rem; color:#6ee7b7; margin-top:4px;"><b>Deliverable:</b> ${f.keluaran}</div>` : ''}
+            </div>
+          `).join('');
+        } else {
+          phasesList.innerHTML = '<p style="color:#f43f5e;">Failed to generate phases.</p>';
+        }
+      } catch (e) {
+        phasesList.innerHTML = `<p style="color:#f43f5e;">⚠️ ${e.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

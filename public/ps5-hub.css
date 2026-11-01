@@ -1,0 +1,2309 @@
+/* PS5 Interactive Hub */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --ps-accent: #ffffff;
+  
+  --ps-gold: #f5c518;
+  --ps-silver: #c0c0c0;
+  --ps-bronze: #cd7f32;
+  --ps-platinum: #ffffff;
+  --ps-white: #ffffff;
+  --ps-bg: #000000;
+  
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  --ease-ps: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.25, 0.64, 1);
+  --ease-tile: cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: var(--ps-bg);
+  color: var(--ps-white);
+  font-family: var(--font-family);
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Backdrop */
+.ps5-backdrop-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ps5-backdrop-container.is-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+.ps5-backdrop-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 25%;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.02) translateZ(0);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.ps5-backdrop-layer.active {
+  opacity: 1;
+  transform: scale(1) translateZ(0);
+}
+
+/* Atmospheric Vignette & Scrim */
+.ps5-vignette {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 95% 75% at 50% 32%, transparent 25%, rgba(3, 5, 8, 0.65) 80%),
+    linear-gradient(180deg, rgba(3, 5, 8, 0.85) 0%, rgba(3, 5, 8, 0.12) 20%, rgba(3, 5, 8, 0.35) 55%, rgba(3, 5, 8, 0.95) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Subtle gradient ambient beam */
+.ps5-glow-beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 300px;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.7;
+}
+
+/* App container */
+.ps5-app {
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.38s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform;
+  position: relative;
+  z-index: 10;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(14px, 2.2vh, 26px) clamp(20px, 3.5vw, 54px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Top bar */
+.ps5-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: clamp(36px, 4.5vh, 44px);
+  width: 100%;
+  flex-shrink: 0;
+}
+
+
+.ps5-hub-tabs {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2vw, 30px);
+  position: relative;
+}
+
+.ps5-hub-tab {
+  background: transparent;
+  border: none;
+  font-family: var(--font-family);
+  font-size: clamp(16px, 1.35vw, 21px);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  position: relative;
+  padding-bottom: 7px;
+  transition: color 0.22s var(--ease-ps);
+  letter-spacing: -0.01em;
+}
+
+.ps5-hub-tab:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ps5-hub-tab.active {
+  color: #ffffff;
+}
+
+/* Static ::after disabled in favor of smooth animated sliding glider */
+.ps5-hub-tab.active::after {
+  display: none !important;
+}
+
+
+.ps5-hub-tabs-glider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2.5px;
+  background-color: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 2px rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+  transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.2, 1), width 0.32s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.2s ease;
+  will-change: transform, width;
+  opacity: 0;
+}
+
+
+.ps5-system-bar {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.4vw, 22px);
+}
+
+.ps5-back-to-web-btn,
+.ps5-top-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin-right: 2px;
+  transform: none !important;
+}
+
+@media (min-width: 769px) {
+  .ps5-top-back-btn {
+    display: none !important;
+  }
+}
+
+.ps5-back-to-web-btn:hover,
+.ps5-top-back-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: none !important;
+  color: #ffffff;
+}
+
+.ps5-back-to-web-btn:active,
+.ps5-top-back-btn:active {
+  background: rgba(255, 255, 255, 0.26);
+  transform: none !important;
+}
+
+.ps5-sys-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ps5-sys-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.06);
+}
+
+.ps5-sys-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.ps5-system-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 14px);
+}
+
+.ps5-sound-toggle-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ps5-sound-toggle-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.08);
+}
+
+.ps5-sound-toggle-btn.is-muted {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.ps5-sound-toggle-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+
+.ps5-clock {
+  font-family: var(--font-family);
+  font-size: clamp(13.5px, 1.1vw, 15px);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+}
+
+.ps5-top-back-btn {
+  display: none;
+}
+
+/* Tile carousel */
+.ps5-center-section {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-top: clamp(16px, 2.6vh, 28px);
+  position: relative;
+  z-index: 5;
+}
+
+.ps5-ribbon-wrapper {
+  position: relative;
+  width: calc(100% + 56px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 28px 46px 28px;
+  margin-left: -28px;
+  margin-right: -28px;
+  margin-bottom: -30px;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
+}
+
+.ps5-ribbon-wrapper:active {
+  cursor: grabbing;
+}
+
+.ps5-ribbon-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.ps5-tiles-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.1vw, 16px);
+  width: max-content;
+}
+
+/* Individual Tile (Pure, Crisp 2px Border, Zero Subpixel Corner Artifacts) */
+.ps5-tile {
+  width: clamp(74px, 5.6vw, 84px);
+  height: clamp(74px, 5.6vw, 84px);
+  border-radius: 14px;
+  background: #18181b;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  outline: none;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  padding: 14px;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  transition: transform 0.22s var(--ease-spring), opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.22s ease;
+}
+
+.ps5-tile img.ps5-brand-img {
+  width: 100%;
+  height: 100%;
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+  transition: transform 0.22s ease;
+}
+
+
+.ps5-tile[data-type="claude"] { background: linear-gradient(135deg, #1c1511 0%, #3d2417 100%); }
+.ps5-tile[data-type="antigravity"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="cursor"] { background: linear-gradient(135deg, #0e1118 0%, #1c2230 100%); }
+.ps5-tile[data-type="codex"] { background: linear-gradient(135deg, #091a14 0%, #064e3b 100%); }
+.ps5-tile[data-type="kimi"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="cline"] { background: linear-gradient(135deg, #081a14 0%, #0d4230 100%); }
+.ps5-tile[data-type="omp"] { background: linear-gradient(135deg, #2e083a 0%, #6b21a8 100%); }
+
+.ps5-tile[data-type="npx"] { background: linear-gradient(135deg, #2b0c0c 0%, #7f1d1d 100%); }
+.ps5-tile[data-type="skillssh"] { background: linear-gradient(135deg, #190f2b 0%, #4c1d95 100%); }
+.ps5-tile[data-type="pi"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="git"] { background: linear-gradient(135deg, #241411 0%, #4a1d13 100%); }
+
+.ps5-tile[data-type="opencode"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="copilot"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="hermes"] { background: linear-gradient(135deg, #1a1608 0%, #423814 100%); }
+.ps5-tile[data-type="amp"] { background: linear-gradient(135deg, #1e1308 0%, #4a280c 100%); }
+.ps5-tile[data-type="gemini"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="file"] { background: linear-gradient(135deg, #18181b 0%, #27272a 100%); }
+.ps5-tile[data-type="mobile"] { background: linear-gradient(135deg, #181124 0%, #351f54 100%); }
+.ps5-tile[data-type="skill-core"] { background: linear-gradient(135deg, #241116 0%, #4a1522 100%); }
+.ps5-tile[data-type="skill-ui"] { background: linear-gradient(135deg, #24101e 0%, #4a1435 100%); }
+.ps5-tile[data-type="skill-copywriting"] { background: linear-gradient(135deg, #221810 0%, #422817 100%); }
+.ps5-tile[data-type="skill-human"] { background: linear-gradient(135deg, #0d2020 0%, #153e3e 100%); }
+.ps5-tile[data-type="skill-mobile"] { background: linear-gradient(135deg, #26140e 0%, #542212 100%); }
+.ps5-tile[data-type="skill-code"] { background: linear-gradient(135deg, #0e1e19 0%, #163e2e 100%); }
+
+
+.ps5-tile:not(.active) {
+  opacity: 0.72;
+}
+
+.ps5-tile:not(.active):hover {
+  opacity: 0.95;
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Active PS5 State: Crisp 2px White Border, Zero Bleeding, Zero Glow */
+.ps5-tile.active {
+  opacity: 1;
+  transform: translateY(-4px) scale(1.08);
+  border-color: #ffffff;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5), 0 12px 26px rgba(0, 0, 0, 0.38);
+  z-index: 10;
+}
+
+.ps5-tile.active img.ps5-brand-img {
+  transform: scale(1.06);
+}
+
+/* Showcase */
+.ps5-details-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: clamp(24px, 3.5vw, 44px);
+  margin-top: auto;
+  margin-bottom: clamp(10px, 1.8vh, 22px);
+  flex-grow: 1;
+  position: relative;
+  z-index: 4;
+}
+
+.ps5-game-info {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(7px, 1.1vh, 11px);
+  max-width: 660px;
+}
+
+
+.ps5-edition-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-family);
+  font-size: clamp(12px, 0.9vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ps5-edition-badge .ps-badge-pill {
+  background: rgba(255, 255, 255, 0.16);
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-family: var(--font-family);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.ps5-edition-badge .ps-badge-meta {
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.ps5-edition-badge .ps-badge-sep {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+}
+
+.ps5-game-title {
+  font-family: var(--font-family);
+  font-size: clamp(30px, 4.2vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #ffffff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+  animation: ps5FadeUp 0.35s var(--ease-ps) forwards;
+}
+
+.ps5-game-desc {
+  font-family: var(--font-family);
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 540px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+
+.ps5-action-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  margin-bottom: 3px;
+}
+
+.ps5-action-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-family);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.ps5-action-pill:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.ps5-action-pill.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+/* Command pill */
+.form-pill-container {
+  width: 100%;
+  max-width: 530px;
+  display: flex;
+  align-items: center;
+  padding: 5px 6px 5px 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.form-pill-container:hover,
+.form-pill-container:focus-within {
+  border-color: rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transform: none !important;
+}
+
+.form-pill-container:active {
+  transform: none !important;
+}
+
+.pill-prefix {
+  color: rgba(255, 255, 255, 0.45);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-right: 10px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.email-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  min-width: 0;
+  letter-spacing: 0.02em;
+  outline: none;
+  cursor: pointer;
+}
+
+.email-input::selection {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+
+.btn-icon-copy {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.btn-icon-copy:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.42);
+  transform: none !important;
+}
+
+.btn-icon-copy:active {
+  transform: none !important;
+}
+
+.btn-icon-copy .icon-copy {
+  display: block;
+}
+
+.btn-icon-copy .icon-check {
+  display: none;
+  color: #a8f5c4;
+}
+
+.btn-icon-copy.is-copied {
+  background: rgba(15, 80, 40, 0.45);
+  border-color: rgba(100, 255, 150, 0.4);
+}
+
+.btn-icon-copy.is-copied .icon-copy {
+  display: none;
+}
+
+.btn-icon-copy.is-copied .icon-check {
+  display: block;
+}
+
+
+.ps5-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.ps5-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: clamp(42px, 4.8vh, 48px);
+  padding: 0 clamp(24px, 2.6vw, 34px);
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: #000000;
+  border: none;
+  font-family: var(--font-family);
+  font-size: clamp(14px, 1.05vw, 15px);
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.18s ease, opacity 0.18s ease;
+}
+
+.ps5-btn-primary:hover {
+  transform: none !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  background-color: #f2f2f7;
+}
+
+.ps5-btn-primary:active {
+  transform: none !important;
+  background-color: #e4e4e7;
+}
+
+.ps5-btn-primary svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.ps5-btn-primary.copied {
+  background-color: #2ea44f !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+
+.ps5-btn-circle {
+  width: clamp(42px, 4.8vh, 48px);
+  height: clamp(42px, 4.8vh, 48px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.ps5-btn-circle:hover {
+  transform: none !important;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ps5-btn-circle:active {
+  transform: none !important;
+}
+
+.ps5-btn-circle svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* Mobile remote controller (desktop uses the key hints below) */
+.ps5-mobile-remote {
+  display: none;
+}
+
+/* Controller bar */
+.ps5-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: clamp(8px, 1.2vh, 14px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: clamp(11.5px, 0.9vw, 12.5px);
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.ps5-controls-legend {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.8vw, 24px);
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.ps5-key-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
+/* Keyboard indicators */
+.kbd,
+.key-badge,
+.ps5-btn-hint-badge {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: text-top;
+  white-space: nowrap;
+  user-select: none;
+  cursor: default;
+  letter-spacing: -0.01em;
+  border-radius: 5px;
+  min-width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  padding: 0 5.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", monospace, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #f4f4f5;
+  background-color: rgba(255, 255, 255, 0.08);
+  position: relative;
+  transition: all 0.08s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow:
+    inset 0 -1px 3px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.03),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.kbd:hover,
+.key-badge:hover,
+.ps5-btn-hint-badge:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+
+.kbd.is-pressed,
+.kbd:active,
+.key-badge.is-pressed,
+.ps5-btn-hint-badge.is-pressed {
+  transform: translateY(1.5px);
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.24);
+}
+
+.kbd-arrow {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  stroke-width: 2.6;
+  stroke: currentColor;
+  vertical-align: middle;
+}
+
+.kbd-sep {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 1px;
+  user-select: none;
+}
+
+.kbd-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.68);
+  margin-left: 2px;
+  letter-spacing: 0.01em;
+}
+
+.kbd.ps-btn-cross,
+.key-badge.ps-btn-cross {
+  font-weight: 700;
+  font-size: 11px;
+  color: #ffffff;
+}
+
+.ps5-sound-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
+}
+
+.ps5-sound-toggle:hover {
+  color: #ffffff;
+}
+
+
+@keyframes ps5FadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Launch transition */
+.ps5-launch-veil {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 850;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity;
+}
+
+.ps5-launch-veil.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.ps5-app.launching {
+  transform: scale(1.025) translate3d(0, 0, 0);
+}
+
+.ps5-app.is-hidden {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Guide subpage */
+.ps5-unicorn-stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 680;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  background-color: transparent;
+}
+
+.ps5-unicorn-stage.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.ps5-unicorn-stage.boot-mode {
+  z-index: 99990 !important;
+  background-color: #030508;
+  transition: opacity 2.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 2.2s ease;
+}
+
+.ps5-subpage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 700;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ps5-subpage.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+
+#studioBackgroundContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #030508;
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-us-project] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+[data-us-project] a,
+[data-us-project] [class*="watermark"],
+[data-us-project] [class*="badge"],
+[data-us-project] [class*="credit"],
+[class*="unicorn-watermark"],
+[class*="unicorn-badge"],
+a[href*="unicorn.studio"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+[data-us-project] canvas,
+#curtains-canvas,
+#curtains-canvas canvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.025;
+  transform: translate3d(0, 0, 0);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.ps5-subpage-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: 
+    radial-gradient(ellipse 95% 75% at 50% 25%, transparent 20%, rgba(3, 5, 8, 0.65) 85%),
+    linear-gradient(180deg, rgba(3, 5, 8, 0.72) 0%, rgba(3, 5, 8, 0.15) 20%, rgba(3, 5, 8, 0.45) 55%, rgba(3, 5, 8, 0.94) 100%);
+}
+
+
+.ps5-subpage-shell {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+.ps5-subpage-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 clamp(20px, 3.5vw, 54px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(3, 5, 8, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  transform: translate3d(0, 0, 0);
+  z-index: 20;
+}
+
+.ps5-subpage-top-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ps5-subpage-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.18s ease;
+}
+
+.ps5-subpage-back-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: none !important;
+}
+
+
+.ps5-subpage-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ps5-subpage-crumb .crumb-hub {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ps5-subpage-crumb .crumb-sep {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.ps5-subpage-crumb .crumb-current {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ps5-subpage-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ps-subpage-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+}
+
+/* Subpage Scrollable Body - Completely Hidden Scrollbar, Fluid GPU-Accelerated Scroll */
+.ps5-subpage-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: clamp(24px, 3.5vh, 40px) clamp(20px, 3.5vw, 54px) 80px;
+  scrollbar-width: none !important; 
+  -ms-overflow-style: none !important; 
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  transform: translate3d(0, 0, 0);
+  will-change: scroll-position;
+}
+
+.ps5-subpage-scroll::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.ps5-subpage-scroll::-webkit-scrollbar-track,
+.ps5-subpage-scroll::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+}
+
+.ps5-subpage-container {
+  max-width: 900px;
+  margin: 0 auto;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+
+.ps5-subpage-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(16px, 2.5vw, 28px);
+  margin-bottom: clamp(24px, 3vh, 32px);
+}
+
+.ps5-subpage-icon-wrapper {
+  width: clamp(72px, 8vw, 88px);
+  height: clamp(72px, 8vw, 88px);
+  border-radius: 20px;
+  background: #141416;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.ps5-subpage-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+}
+
+.ps5-subpage-hero-meta {
+  flex: 1;
+}
+
+.ps5-subpage-hero-meta .ps5-edition-badge {
+  margin-bottom: 6px;
+}
+
+.ps5-subpage-title {
+  font-size: clamp(26px, 3.2vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.ps5-subpage-desc {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 760px;
+}
+
+
+.ps5-subpage-tabs-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 14px;
+}
+
+.ps5-subpage-indicator-track {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 2px;
+  display: none;
+}
+
+.ps5-subpage-indicator-thumb {
+  height: 100%;
+  width: 25%;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  transform: translateX(0);
+  transition: transform 0.05s linear;
+}
+
+.ps5-subpage-nav-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ps5-subpage-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+
+.ps5-subpage-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ps5-subpage-tab.active {
+  background: #ffffff;
+  color: #030508;
+  border-color: #ffffff;
+  box-shadow: none !important;
+}
+
+.ps5-tab-num {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: inherit;
+}
+
+.ps5-subpage-tab.active .ps5-tab-num {
+  background: rgba(0, 0, 0, 0.15);
+  color: #030508;
+}
+
+/* Guide content */
+.subpage-panel-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 280px; 
+}
+
+
+.subpage-intro-text {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 22px;
+  max-width: 760px;
+}
+
+
+.subpage-steps-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.subpage-step-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subpage-step-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.subpage-step-num {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.subpage-step-heading {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.subpage-step-text {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.65);
+  max-width: 740px;
+}
+
+/* Transitions.dev Command Input Box Shape - Full Width, Zero-Blue, Stable */
+.subpage-cmd-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  height: 42px;
+  padding: 0 10px 0 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: none;
+  cursor: pointer;
+  transition: border-color 150ms ease-out, background 150ms ease-out;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.subpage-cmd-box:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.20);
+  box-shadow: none;
+}
+
+.subpage-cmd-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.subpage-cmd-prompt {
+  color: rgba(255, 255, 255, 0.35);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.subpage-cmd-code {
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  user-select: text;
+}
+
+.subpage-cmd-code::-webkit-scrollbar {
+  display: none;
+}
+
+
+.spell-copy-btn {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #d4d4d8;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  outline: none;
+  padding: 0;
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.spell-copy-btn:hover {
+  background: transparent;
+  border: none;
+  opacity: 0.75;
+}
+
+.spell-copy-btn:active {
+  transform: scale(0.92);
+}
+
+.spell-icon-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34d399; 
+  transform: scale(0.7);
+  opacity: 0;
+  filter: blur(2px);
+  transition: transform 200ms ease-out, opacity 200ms ease-out, filter 200ms ease-out;
+  pointer-events: none;
+}
+
+.spell-icon-copy {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d4d4d8;
+  transform: scale(1);
+  opacity: 1;
+  filter: blur(0);
+  transition: transform 200ms ease-out, opacity 200ms ease-out, filter 200ms ease-out;
+  pointer-events: none;
+}
+
+.spell-copy-btn.copied .spell-icon-check {
+  transform: scale(1);
+  opacity: 1;
+  filter: blur(0);
+}
+
+.spell-copy-btn.copied .spell-icon-copy {
+  transform: scale(0);
+  opacity: 0;
+  filter: blur(2px);
+}
+
+.subpage-note-line {
+  margin-top: 18px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 740px;
+}
+
+.subpage-note-line strong {
+  color: #ffffff;
+}
+
+.subpage-clean-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.subpage-clean-list li {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+}
+
+/* Boot sequence */
+.ps5-boot-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 99980;
+  background-color: #000000;
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.9s ease;
+}
+
+.ps5-boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99995;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 2.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 2.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ps5-boot-screen.is-playing {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.ps5-boot-center {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ps5-boot-title {
+  font-family: var(--font-family);
+  font-size: clamp(3rem, 6.5vw, 4.8rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.85);
+}
+
+.ps5-boot-skip-hint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-family);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.ps5-boot-screen.is-playing .ps5-boot-skip-hint {
+  opacity: 0.8;
+}
+
+/* Responsive reflow */
+
+/* Tablet & Mobile Breakpoint (<= 880px) */
+@media (max-width: 880px) {
+  html, body {
+    width: 100%;
+    min-height: 100dvh;
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
+  body.subpage-active {
+    overflow: hidden !important;
+  }
+
+  .ps5-app.launching {
+    transform: none !important;
+  }
+
+  /* Switch from rigid 100vh viewport to smooth scrollable mobile app shell */
+  .ps5-app {
+    width: 100%;
+    min-height: 100dvh;
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    padding: 16px 16px 40px 16px !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+  }
+
+  
+  .ps5-topbar {
+    height: auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  
+  .ps5-system-bar {
+    order: 1 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .ps5-top-back-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 14px 0 10px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.09) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease !important;
+    flex-shrink: 0 !important;
+    outline: none !important;
+  }
+
+  .ps5-top-back-btn:active {
+    transform: scale(0.96) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+  }
+
+  .ps5-back-to-web-btn {
+    height: 40px !important;
+    min-height: 44px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: 0 !important;
+  }
+
+  .ps5-system-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ps5-sound-toggle-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .ps5-sys-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .ps5-clock {
+    display: none !important; 
+  }
+
+  
+  .ps5-hub-tabs {
+    order: 2 !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    gap: 14px !important;
+    padding-bottom: 6px !important;
+    padding-top: 2px !important;
+    display: flex !important;
+  }
+
+  .ps5-hub-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .ps5-hub-tab {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    min-height: 44px !important;
+    padding: 6px 8px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  
+  .ps5-center-section {
+    margin-top: 4px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .ps5-ribbon-wrapper {
+    width: calc(100% + 32px) !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-bottom: 0 !important;
+    padding: 8px 0 20px 20px !important;
+    scroll-padding-left: 20px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    scroll-snap-type: x mandatory !important;
+    cursor: grab;
+  }
+
+  .ps5-ribbon-wrapper:active {
+    cursor: grabbing;
+  }
+
+  .ps5-ribbon-wrapper::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .ps5-tiles-track {
+    gap: 10px !important;
+    padding-right: calc(100vw - 72px) !important;
+  }
+
+  .ps5-tile {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    min-height: 72px !important;
+    border-radius: 14px !important;
+    padding: 12px !important;
+  }
+
+  .ps5-tile.active {
+    transform: translateY(-2px) scale(1.05) !important;
+  }
+
+  .ps5-tile img.ps5-brand-img {
+    max-width: 40px !important;
+    max-height: 40px !important;
+  }
+
+  /* 3. DETAILS SECTION - pushed down further for elegant breathing room below tiles */
+  .ps5-details-section {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    margin-top: clamp(52px, 10vh, 76px) !important;
+    margin-bottom: 24px !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .ps5-game-info {
+    max-width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .ps5-edition-badge {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+  }
+
+  .ps5-game-title {
+    font-size: clamp(26px, 7vw, 36px) !important;
+    line-height: 1.15 !important;
+  }
+
+  .ps5-game-desc {
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+    max-width: 100% !important;
+    color: rgba(255, 255, 255, 0.78) !important;
+  }
+
+  .ps5-action-tabs {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-top: 4px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .ps5-action-pill {
+    min-height: 38px !important;
+    padding: 6px 14px !important;
+    font-size: 12px !important;
+    border-radius: 9999px !important;
+  }
+
+  
+  .form-pill-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 50px !important;
+    padding: 4px 6px 4px 16px !important;
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .pill-prefix {
+    font-size: 13.5px !important;
+    margin-right: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .email-input {
+    font-size: 13px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .btn-icon-copy {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    outline: none !important;
+  }
+
+  .btn-icon-copy svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  
+  .ps5-actions-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+  }
+
+  .ps5-btn-primary {
+    flex: 1 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 0 16px !important;
+    border-radius: 9999px !important;
+  }
+
+  .ps5-btn-circle {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* 3b. MOBILE REMOTE CONTROLLER - desktop keycaps, sized for touch */
+  .ps5-mobile-remote {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 14px 12px !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .ps5-remote-cluster {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 7px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .ps5-remote-keys {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* The desktop keycap look, scaled up so it is comfortable to tap. */
+  .ps5-mobile-remote .kbd.ps5-remote-key {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    border: 0 !important;
+    margin: 0 !important;
+    height: 36px !important;
+    min-width: 38px !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", monospace, sans-serif !important;
+    cursor: pointer !important;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .ps5-mobile-remote .kbd.ps5-remote-key--wide {
+    min-width: 56px !important;
+    padding: 0 14px !important;
+  }
+
+  .ps5-mobile-remote .kbd.ps5-remote-key .kbd-arrow {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /* 36px keycap + 8px of invisible hit area = a 44px touch target. */
+  .ps5-remote-key::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: -4px -3px !important;
+  }
+
+
+  .ps5-bottom-bar {
+    height: auto !important;
+    padding: 12px 0 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    justify-content: center !important;
+  }
+
+  .ps5-controls-legend {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .ps5-controls-legend .ps5-key-pill {
+    display: none !important; 
+  }
+
+  .ps5-back-to-web-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 8px 18px !important;
+    font-size: 13px !important;
+    min-height: 44px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    transform: none !important;
+  }
+
+  .ps5-sound-toggle {
+    min-height: 44px !important;
+    padding: 0 16px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    font-size: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  
+  .ps5-subpage {
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+  }
+
+  .ps5-subpage-shell {
+    padding: 0 !important;
+    height: 100% !important;
+  }
+
+  .ps5-subpage-topbar {
+    padding: 12px 16px !important;
+    height: auto !important;
+    min-height: 56px !important;
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+  }
+
+  .ps5-subpage-top-left {
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .ps5-subpage-back-btn {
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+  }
+
+  .ps5-btn-hint-badge {
+    display: none !important; 
+  }
+
+  .ps5-subpage-crumb {
+    font-size: 12px !important;
+  }
+
+  .ps5-subpage-actions-right .ps-subpage-badge {
+    display: none !important;
+  }
+
+  .ps5-subpage-scroll {
+    padding: 16px 16px max(60px, env(safe-area-inset-bottom)) 16px !important;
+  }
+
+  .ps5-subpage-hero {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    grid-template-areas:
+      "icon badge"
+      "title title"
+      "desc desc" !important;
+    gap: 8px 12px !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+  }
+
+  .ps5-subpage-icon-wrapper {
+    grid-area: icon !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    border-radius: 14px !important;
+    padding: 8px !important;
+  }
+
+  .ps5-subpage-hero-meta {
+    display: contents !important;
+  }
+
+  .ps5-subpage-hero-meta .ps5-edition-badge {
+    grid-area: badge !important;
+    margin-bottom: 0 !important;
+    align-self: center !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px 6px !important;
+  }
+
+  .ps5-subpage-title {
+    grid-area: title !important;
+    width: 100% !important;
+    font-size: clamp(24px, 6.8vw, 32px) !important;
+    line-height: 1.15 !important;
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+    text-align: left !important;
+    padding-left: 0 !important;
+  }
+
+  .ps5-subpage-desc {
+    grid-area: desc !important;
+    width: 100% !important;
+    font-size: 13.5px !important;
+    line-height: 1.55 !important;
+    max-width: 100% !important;
+    text-align: left !important;
+    padding-left: 0 !important;
+    color: rgba(255, 255, 255, 0.78) !important;
+  }
+
+  
+  .ps5-subpage-tabs-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 4px !important;
+    width: 100% !important;
+    border-bottom: none !important;
+  }
+
+  .ps5-subpage-nav-tabs {
+    width: 100% !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    gap: 8px !important;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .ps5-subpage-nav-tabs:active {
+    cursor: grabbing;
+  }
+
+  .ps5-subpage-nav-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .ps5-subpage-indicator-track {
+    width: 100% !important;
+    height: 2px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 999px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    margin-top: 2px !important;
+    display: block;
+  }
+
+  .ps5-subpage-indicator-thumb {
+    height: 100% !important;
+    width: 25%;
+    background: rgba(255, 255, 255, 0.55) !important;
+    border-radius: 999px !important;
+    transform: translateX(0);
+    transition: width 0.2s ease, transform 0.04s ease-out !important;
+  }
+
+  .ps5-bottom-bar {
+    display: none !important;
+  }
+
+  .ps5-subpage-tab {
+    min-height: 38px !important;
+    padding: 3px 11px !important;
+    gap: 5px !important;
+    font-size: 11.5px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ps5-tab-num {
+    font-size: 9px !important;
+    padding: 1px 5px !important;
+  }
+
+  .subpage-cmd-box {
+    min-height: 44px !important;
+    height: auto !important;
+    padding: 4px 8px 4px 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .subpage-cmd-code {
+    font-size: 12px !important;
+  }
+
+  .spell-copy-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    border-radius: 8px !important;
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .subpage-step-code-card {
+    border-radius: 12px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .subpage-step-code-card pre {
+    font-size: 11.5px !important;
+    line-height: 1.55 !important;
+    padding: 12px 14px !important;
+  }
+}
+
+/* Narrow Phone Breakpoint (<= 480px) */
+@media (max-width: 480px) {
+  .ps5-app {
+    padding: max(12px, env(safe-area-inset-top)) 12px max(28px, env(safe-area-inset-bottom)) 12px !important;
+  }
+
+  .ps5-game-title {
+    font-size: clamp(24px, 7.5vw, 30px) !important;
+  }
+
+  /* Phones: reserve the tallest badge and description states so switching to
+     an item with a short description never pulls the actions upward. */
+  .ps5-edition-badge {
+    min-height: 42px !important;
+    align-content: flex-start !important;
+  }
+
+  .ps5-game-desc {
+    min-height: 81px !important;
+  }
+
+  .ps5-tile {
+    width: 66px !important;
+    height: 66px !important;
+    min-width: 66px !important;
+    min-height: 66px !important;
+    padding: 10px !important;
+  }
+
+  .ps5-tile img.ps5-brand-img {
+    max-width: 36px !important;
+    max-height: 36px !important;
+  }
+
+  .ps5-btn-primary {
+    font-size: 13px !important;
+  }
+
+  .form-pill-container {
+    height: 48px !important;
+    padding: 4px 6px 4px 14px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .email-input {
+    font-size: 12px !important;
+  }
+
+  .btn-icon-copy {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .btn-icon-copy svg {
+    width: 15px !important;
+    height: 15px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+
+
+
+@media (max-width: 340px) {
+  /* At this width the longest description wraps to five lines, so the
+     reserved space grows with it and the actions stay put. */
+  .ps5-game-desc {
+    min-height: 101px !important;
+  }
+}
