@@ -1808,134 +1808,78 @@
   
 
 
-    // ===== THREE.JS 3D MARKET GLOBE ENGINE =====
+        // ===== CLEAN & MINIMAL 3D SPATIAL BACKGROUND =====
     function init3DMarketGlobe() {
       const canvas = document.getElementById('canvas3d');
       if (!canvas || typeof THREE === 'undefined') return;
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x060814, 0.0016);
+      scene.fog = new THREE.FogExp2(0x060814, 0.0018);
 
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 44;
+      const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 48);
 
       const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
 
-      // Ambient & Directional Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+      // Soft ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambientLight);
 
-      const lightCyan = new THREE.PointLight(0x38bdf8, 3, 140);
-      lightCyan.position.set(25, 20, 25);
-      scene.add(lightCyan);
-
-      const lightEmerald = new THREE.PointLight(0x10b981, 2.5, 140);
-      lightEmerald.position.set(-25, -15, 25);
-      scene.add(lightEmerald);
-
-      const lightPurple = new THREE.PointLight(0xa855f7, 2.5, 140);
-      lightPurple.position.set(0, -30, -10);
-      scene.add(lightPurple);
+      const cyanLight = new THREE.PointLight(0x38bdf8, 2, 120);
+      cyanLight.position.set(20, 25, 20);
+      scene.add(cyanLight);
 
       const group = new THREE.Group();
       scene.add(group);
 
-      // 1. 3D Wireframe World Sphere (Global Market)
-      const sphereGeo = new THREE.SphereGeometry(15, 26, 26);
-      const sphereMat = new THREE.MeshStandardMaterial({
+      // 1. Single Clean, Minimal Wireframe Sphere (Calm, low opacity, no clutter)
+      const sphereGeo = new THREE.SphereGeometry(15, 22, 22);
+      const sphereMat = new THREE.MeshBasicMaterial({
         color: 0x38bdf8,
         wireframe: true,
         transparent: true,
-        opacity: 0.16,
-        roughness: 0.2,
-        metalness: 0.8
+        opacity: 0.07
       });
-      const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
-      group.add(worldSphere);
+      const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+      sphere.position.set(0, 5, -8);
+      group.add(sphere);
 
-      // 2. Latitude / Longitude Cyber Rings
-      const ringGeo1 = new THREE.TorusGeometry(17.5, 0.12, 16, 100);
-      const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.3 });
-      const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-      ring1.rotation.x = Math.PI / 2.3;
-      group.add(ring1);
+      // 2. Subtle 3D Flowing Market Dot Grid Wave (Placed low to frame the content)
+      const SEPARATION = 3.6, AMOUNTX = 36, AMOUNTY = 36;
+      const numParticles = AMOUNTX * AMOUNTY;
+      const positions = new Float32Array(numParticles * 3);
 
-      const ringGeo2 = new THREE.TorusGeometry(19, 0.1, 16, 100);
-      const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.25 });
-      const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
-      ring2.rotation.y = Math.PI / 3;
-      group.add(ring2);
-
-      // 3. Global Market Hub Nodes
-      const hubCoords = [
-        { x: 6.5, y: 7.5, z: 11.5, name: 'North America', color: 0x38bdf8 },
-        { x: -3.5, y: 10.5, z: 10, name: 'Western Europe', color: 0x10b981 },
-        { x: 11.5, y: 5, z: -8, name: 'East Asia', color: 0xf59e0b },
-        { x: 10.5, y: -2, z: 10, name: 'Southeast Asia', color: 0x38bdf8 },
-        { x: 12.5, y: -8.5, z: 5, name: 'Oceania', color: 0xa855f7 }
-      ];
-
-      const nodeGroup = new THREE.Group();
-      group.add(nodeGroup);
-
-      hubCoords.forEach(hub => {
-        const nodeGeo = new THREE.SphereGeometry(0.65, 16, 16);
-        const nodeMat = new THREE.MeshBasicMaterial({ color: hub.color });
-        const nodeMesh = new THREE.Mesh(nodeGeo, nodeMat);
-        nodeMesh.position.set(hub.x, hub.y, hub.z);
-        nodeGroup.add(nodeMesh);
-
-        // Pulsing Ring
-        const pGeo = new THREE.RingGeometry(0.8, 1.2, 24);
-        const pMat = new THREE.MeshBasicMaterial({ color: hub.color, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
-        const pMesh = new THREE.Mesh(pGeo, pMat);
-        pMesh.position.set(hub.x, hub.y, hub.z);
-        pMesh.lookAt(0, 0, 0);
-        nodeGroup.add(pMesh);
-      });
-
-      // 4. Trade Connection Arcs
-      for (let i = 0; i < hubCoords.length - 1; i++) {
-        const p1 = new THREE.Vector3(hubCoords[i].x, hubCoords[i].y, hubCoords[i].z);
-        const p2 = new THREE.Vector3(hubCoords[i+1].x, hubCoords[i+1].y, hubCoords[i+1].z);
-        const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-        mid.normalize().multiplyScalar(20);
-
-        const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
-        const points = curve.getPoints(25);
-        const curveGeo = new THREE.BufferGeometry().setFromPoints(points);
-        const curveMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.35 });
-        const curveLine = new THREE.Line(curveGeo, curveMat);
-        group.add(curveLine);
+      let i = 0;
+      for (let ix = 0; ix < AMOUNTX; ix++) {
+        for (let iy = 0; iy < AMOUNTY; iy++) {
+          positions[i] = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
+          positions[i + 1] = -16; // Low elevation so cards stay pristine
+          positions[i + 2] = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
+          i += 3;
+        }
       }
 
-      // 5. Starfield & Data Dust
-      const particleCount = 450;
-      const particleGeo = new THREE.BufferGeometry();
-      const positions = new Float32Array(particleCount * 3);
-      for (let i = 0; i < particleCount * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 160;
-        positions[i+1] = (Math.random() - 0.5) * 160;
-        positions[i+2] = (Math.random() - 0.5) * 160;
-      }
-      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const particleMat = new THREE.PointsMaterial({
-        size: 1.2,
+      const gridGeo = new THREE.BufferGeometry();
+      gridGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const gridMat = new THREE.PointsMaterial({
+        size: 1.6,
         color: 0x38bdf8,
         transparent: true,
-        opacity: 0.3
+        opacity: 0.24
       });
-      const particles = new THREE.Points(particleGeo, particleMat);
-      scene.add(particles);
+
+      const waveParticles = new THREE.Points(gridGeo, gridMat);
+      scene.add(waveParticles);
 
       // Mouse Parallax
       let mouseX = 0, mouseY = 0;
       let targetX = 0, targetY = 0;
       window.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) * 0.0005;
-        mouseY = (e.clientY - window.innerHeight / 2) * 0.0005;
+        mouseX = (e.clientX - window.innerWidth / 2) * 0.0003;
+        mouseY = (e.clientY - window.innerHeight / 2) * 0.0003;
       });
 
       window.addEventListener('resize', () => {
@@ -1944,18 +1888,29 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
 
+      let count = 0;
       function animate() {
         requestAnimationFrame(animate);
+        count += 0.018;
+
         targetX += (mouseX - targetX) * 0.05;
         targetY += (mouseY - targetY) * 0.05;
 
-        group.rotation.y += 0.0025;
-        group.rotation.x = targetY * 1.5;
-        group.rotation.y += targetX * 1.5;
+        // Gentle, slow rotation
+        sphere.rotation.y += 0.0012;
+        sphere.rotation.x = targetY * 0.6;
+        sphere.rotation.y += targetX * 0.6;
 
-        ring1.rotation.z += 0.0018;
-        ring2.rotation.z -= 0.0015;
-        particles.rotation.y -= 0.0004;
+        // Subtle topographic wave motion
+        const posArr = waveParticles.geometry.attributes.position.array;
+        let index = 0;
+        for (let ix = 0; ix < AMOUNTX; ix++) {
+          for (let iy = 0; iy < AMOUNTY; iy++) {
+            posArr[index + 1] = -16 + (Math.sin((ix + count) * 0.28) * 1.8) + (Math.sin((iy + count) * 0.45) * 1.8);
+            index += 3;
+          }
+        }
+        waveParticles.geometry.attributes.position.needsUpdate = true;
 
         renderer.render(scene, camera);
       }
