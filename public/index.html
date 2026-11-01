@@ -116,7 +116,7 @@
       font-weight: 700 !important;
       border-radius: 999px !important;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
       font-family: var(--font-sans);
     }
     .nav-btn.membership {
@@ -222,7 +222,7 @@
     }
     .hero-stat span {
       font-size: 0.72rem;
-      color: #64748b;
+      color: #94a3b8;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -269,7 +269,7 @@
       border-radius: 10px;
       padding: 12px 14px;
       outline: none;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
     }
     textarea {
@@ -279,7 +279,7 @@
     }
     textarea::placeholder,
     input::placeholder {
-      color: #64748b;
+      color: #94a3b8;
     }
     textarea:focus,
     input:focus,
@@ -292,7 +292,7 @@
     .lang-label { margin-top: 16px; }
     .hint {
       font-size: 0.8rem;
-      color: #64748b;
+      color: #94a3b8;
       margin-top: 6px;
       line-height: 1.45;
     }
@@ -312,7 +312,7 @@
       border-radius: 12px;
       cursor: pointer;
       box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
     button:hover, #btn:hover {
@@ -538,7 +538,7 @@
     }
     .price-note {
       font-size: 0.82rem;
-      color: #64748b;
+      color: #94a3b8;
       margin-top: 4px;
     }
 
@@ -556,7 +556,7 @@
       box-shadow: none;
       cursor: pointer;
       display: none;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
     }
     .roadmap-btn:hover {
       background: rgba(56, 189, 248, 0.2);
@@ -654,14 +654,14 @@
     .ide-item .cat {
       display: block;
       font-size: 0.72rem;
-      color: #64748b;
+      color: #94a3b8;
       margin-top: 2px;
     }
 
     /* ===== Footer & Utilities ===== */
     .footer {
       text-align: center;
-      color: #64748b;
+      color: #94a3b8;
       font-size: 0.78rem;
       margin-top: 32px;
       line-height: 1.5;
@@ -702,7 +702,7 @@
       top: 14px;
       right: 16px;
       font-size: 1.25rem;
-      color: #64748b;
+      color: #94a3b8;
       background: none !important;
       border: none !important;
       cursor: pointer;
@@ -728,7 +728,7 @@
       padding: 6px 14px !important;
       font-size: 0.92rem;
       font-weight: 700;
-      color: #64748b;
+      color: #94a3b8;
       cursor: pointer;
       border-radius: 6px;
       box-shadow: none !important;
@@ -803,6 +803,26 @@
       color: #94a3b8;
     }
     .tier-box li { padding: 3px 0; }
+  
+    /* Typography & Mobile Input Enhancements (better-typography) */
+    .meter-val, #vis-total, #vis-countries, .price-line b {
+      font-variant-numeric: tabular-nums;
+    }
+    @media (max-width: 640px) {
+      textarea,
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      select {
+        font-size: 16px !important;
+      }
+    }
+    /* UI Polish (better-ui) */
+    button:active, #btn:active {
+      transform: scale(0.98) !important;
+    }
+
   </style>
 </head>
 <body>
@@ -846,7 +866,7 @@
         <input id="negara" type="text" maxlength="100" placeholder="e.g. Japan, Germany, United States, Brazil, …" autocomplete="off">
       </div>
 
-      <label for="locale-select" class="lang-label">🌐 Analysis Language</label>
+      <label for="locale-select" class="lang-label">🌐 Analysis language</label>
       <p class="hint">Market findings & pricing tiers will be generated in this language.</p>
 
       <div class="examples">
@@ -857,8 +877,8 @@
       </div>
 
       <button id="btn">🚀 Analyze Global Market</button>
-      <div id="status"><div id="spinner"></div>Evaluating international buyer demand & competition…</div>
-      <span id="err" class="error" style="display:none"></span>
+      <div id="status" role="status" aria-live="polite"><div id="spinner"></div>Evaluating international buyer demand & competition…</div>
+      <span id="err" class="error" role="alert" style="display:none"></span>
     </div>
 
     <!-- Result Container -->
@@ -892,7 +912,7 @@
         <span style="font-size:1.25rem">☕</span>
         Support marry on Ko-fi
       </a>
-      <p style="font-size:0.75rem; color:#64748b; margin-top:10px;">A coffee keeps the AI tunnel and market intelligence running ❤️</p>
+      <p style="font-size:0.75rem; color:#94a3b8; margin-top:10px;">A coffee keeps the AI tunnel and market intelligence running ❤️</p>
     </div>
 
     <!-- Visitor Stats Widget -->
@@ -902,7 +922,7 @@
           <span style="font-size: 1.25rem;">👣</span>
           <div style="text-align: left;">
             <div id="vis-total" style="font-size: 1.25rem; font-weight: 800; color: var(--market-cyan); font-family: var(--font-mono); line-height: 1.1;">0</div>
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Global Visits</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">Global Visits</div>
           </div>
         </div>
 
@@ -912,13 +932,13 @@
           <span style="font-size: 1.2rem;">🌐</span>
           <div style="text-align: left;">
             <div id="vis-countries" style="font-size: 1.25rem; font-weight: 800; color: #a855f7; font-family: var(--font-mono); line-height: 1.1;">0</div>
-            <div style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Countries Reached</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">Countries Reached</div>
           </div>
         </div>
       </div>
 
       <div id="vis-list" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px;">
-        <span style="font-size: 0.75rem; color: #64748b;">Loading global visitor stats…</span>
+        <span style="font-size: 0.75rem; color: #94a3b8;">Loading global visitor stats…</span>
       </div>
     </div>
 
@@ -928,7 +948,7 @@
   <!-- Auth Modal -->
   <div id="auth-modal" class="modal-backdrop">
     <div class="modal-card">
-      <button class="modal-close" id="close-auth-modal">✕</button>
+      <button class="modal-close" id="close-auth-modal" aria-label="Close sign in dialog">✕</button>
       
       <div id="auth-tabs-wrap" class="auth-tabs">
         <button class="auth-tab active" id="tab-login">Sign In</button>
@@ -951,7 +971,7 @@
 
         <div style="display:flex; align-items:center; gap:10px; margin: 14px 0 10px;">
           <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
-          <span style="font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;">or with email</span>
+          <span style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.04em;">or with email</span>
           <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
         </div>
       </div>
@@ -973,7 +993,7 @@
         <div id="captcha-wrap" style="display:none; margin-bottom: 16px; text-align: left; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 12px; padding: 10px 14px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label style="font-size:0.8rem; font-weight:700; color:var(--market-cyan); margin:0;">🛡️ Anti-Spam Shield</label>
-            <span style="font-size:0.75rem; color:#64748b;">Solve to verify human</span>
+            <span style="font-size:0.75rem; color:#94a3b8;">Solve to verify human</span>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <span id="captcha-question" style="font-weight:800; font-size:1rem; color:#ffffff; background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px;">? + ? =</span>
@@ -1006,7 +1026,7 @@
 
         <div style="display:flex; justify-content:space-between; margin-top:18px; font-size:0.8rem;">
           <a href="#" id="otp-resend-btn" style="color:var(--market-cyan); text-decoration:none; font-weight:600;">🔄 Resend code</a>
-          <a href="#" id="otp-back-btn" style="color:#64748b; text-decoration:none;">← Back to Sign In</a>
+          <a href="#" id="otp-back-btn" style="color:#94a3b8; text-decoration:none;">← Back to Sign In</a>
         </div>
       </div>
 
@@ -1016,7 +1036,7 @@
   <!-- Membership Modal -->
   <div id="membership-modal" class="modal-backdrop">
     <div class="modal-card" style="max-width: 520px;">
-      <button class="modal-close" id="close-membership-modal">✕</button>
+      <button class="modal-close" id="close-membership-modal" aria-label="Close membership dialog">✕</button>
       <div style="text-align: center; margin-bottom: 14px;">
         <span style="font-size: 2.2rem;">👑</span>
         <h3 style="font-size: 1.35rem; color:#ffffff; font-weight:800; margin-top:4px;">Marry Pro 3D Membership</h3>
@@ -1887,6 +1907,13 @@
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
+
+      // Check prefers-reduced-motion (WCAG 2.2.2 / 2.3.3)
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        renderer.render(scene, camera);
+        return;
+      }
 
       let count = 0;
       function animate() {
